@@ -1,0 +1,288 @@
+---
+title: "Time Series and Spectral Analysis"
+author: "James Holland Jones"
+date: "02/19/2018"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    md_extensions: +definition_lists
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Time Series Definitions
+
+Many ecological, epidemiological, and physical data records come in the form of *time series*.  A time series is a sequence of observations recorded at a succession of time intervals.
+
+In general, time series are characterized by dependence. The value of the series at some time $t$ is generally not independent of its value at, say, $t-1$. We use specialized statistics to analyze time series and specialized data structures to represent them in `R`. These data structures greatly facilitate our subsequent analysis. 
+
+These notes provide a very telegraphic introduction to some tools that I have found useful for disease ecology. 
+
+## Some Definitions
+
+Time Series
+
+:    A time series is a set of data indexed by time. For example $\{y_t: t=1,2,\ldots n\}$. Diggle (1990) notes that observations do not need to be evenly spaced and that a "more honest" notation might be $\{y(t_i): t=1,2,\ldots n\}$. 
+
+Autocovariance
+
+:   Time series are typically characterized by some degree of serial dependence. This dependence can be measured by the autocovariance, which is simply the covariance between two elements in the series $\gamma(s,t) = \mathrm{cov}(y_s,y_t) = E(y_s - \mu_s)(y_t - \mu_t)$.
+
+Autocorrelation Function (ACF)
+
+:    The ACF is measure of the linear predictability of the series. It is the Pearson correlation coefficient between to elements of a time series, e.g., at times $s$ and $t$.
+
+$$
+\rho(s,t) = \frac{\gamma(s,t)}{\sqrt{\gamma(s,s)\gamma(t,t)}}
+$$
+## 
+
+Cross-correlation Function (CCF)
+
+:    The CCF is the linear predictability of one series $y_t$ from some other series $x_s$:
+
+$$
+\rho_{xy}(s,t) = \frac{\gamma_{xy}(s,t)}{\sqrt{\gamma_x(s,s)\gamma_y(t,t)}}
+$$
+where $\gamma_{xy}(s,t) = \mathrm{cov}(x_s,y_t) = E(x_s - \mu_{xs})(y_t - \mu_{yt})$ is the cross-covariance.
+
+# Time Series in `R`
+
+`R` has a class for regularly-spaced time-series data (`ts`) but the requirement of regular spacing is quite limiting. Epidemic data are frequently irregular. Furthermore, the format of the dates associated with reporting data can vary wildly. The package `zoo` (which stands for "Z's ordered observations") provides support for irregularly-spaced data that uses arbitrary ordering format.
+
+Use the HadCRUT4 near-surface temperature data from the [Hadley Centre Observation Data Collection](https://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/download.html) for the northern hemisphere, provided by the UK Met Office.
+
+The dates in this data file are in the first column in the format `yyyy/mm`. We need to separate these into a year variable and a month variable. Use the `substr()` command to parse out `yr` and `mo` as separate variables.
+
+```{r, message=FALSE, warning=FALSE}
+library(zoo)
+HC4nh <- read.table("https://web.stanford.edu/class/earthsys214/data/HadCRUT.4.2.0.0.monthly_nh.txt",
+                    header=FALSE)
+yr <- substr(HC4nh$V1,1,4)
+mo <- substr(HC4nh$V1,6,7)
+dates <- as.Date(paste(yr,mo,'01',sep="-"))
+
+## function to standardize (z-score)
+stand <- function(x) {
+    y <- (x - mean(x,na.rm=TRUE))/sd(x,na.rm=TRUE)
+    return(y)
+}
+
+# Create zoo object for satandardised anomalies:
+NH <- zoo(stand(HC4nh$V2),order.by=dates)
+plot(NH,main="",ylab="Standardized Temp (Z)",xlab="Year")
+acf(coredata(NH),lag.max = 240, main="Temperature is Highly Autocorrelated!")
+```
+
+# Spectral Analysis
+
+Many time series show periodic behavior. This periodic behavior can be very complex. Spectral analysis is a technique that allows us to discover underlying periodicities. To perform spectral analysis, we first must transform data from time domain to frequency domain.
+
+The technical details of spectral analysis go well beyond the scope of these notes. The classic source is Priestly (1981), but there are plenty of others. In brief, the covariance of the time series can be represented by a function known as the *spectral density*. The spectral density can be estimated using on object known as a *periodogram*, which is the squared correlation between our time series and sine/cosine waves at the different frequencies spanned by the series (Venables & Ripley 2002).
+
+For large $n$, the periodogram is approximately independent for distinct frequencies. This independence can be improved -- as can the visual quality and interpretability of the plot -- by smoothing the periodogram using a kernel smoother (which is generally some sort of weighted running average).
+
+## A Simple Example
+
+Small signal every three years; larger signal every four years; large signal every six years.
+```{r,cache=TRUE}
+y1 <- rep(c(1,0,0),80)
+y2 <- rep(c(0,0,0,2),60)
+y3 <- rep(c(0,0,0,0,0,5),40)
+y <- y1+y2+y3
+plot(0:240, c(0,y), type="h", xlab="Time", ylab="Value")
+```
+
+Now calculate the frequency spectrum "by hand" using a Fast Fourier Transform, `fft`, function. This code is from Shumway & Stoffer's (2017) excellent book on time series analysis in `R`. Usually, when we're working with real data, we just use the `R` function `spectrum`.
+
+```{r,cache=TRUE}
+I <- abs(fft(y))^2/240
+P <- (4/240)*I[1:120]
+f <- 0:119/240
+plot(f[-1],P[-1], type="l", xlab="Frequency", ylab="Power")
+```
+
+We can see very clearly that we can recover the periodic signals that we built into our toy time series. 
+
+# Some Examples 
+
+## Measles
+
+[Grenfell et al. (2001)](http://dx.doi.org/10.1038/414716a) show the striking clock-like periodicity of measles in the UK in the pre-vaccine era and how it decays following the introduction of a safe, effective measles vaccine. 
+
+Plot historical data from New York City [posted by Ben Bolker](https://ms.mcmaster.ca/~bolker/measdata.html).
+
+```{r}
+require(zoo)
+meas <- read.table("https://web.stanford.edu/class/earthsys214/data/nycmeas.dat.txt", header=FALSE)
+dimnames(meas)[[2]] <- c("Date","Cases")
+meas1 <- zoo(meas$Cases, order.by=meas$Date)
+plot(meas1, xlab="Date", ylab="Cases")
+```
+
+The series looks extremely regular. We can calculate its power spectrum to determine what frequencies dominate the variance. The function `spectrum` is a wrapper for calculating the periodogram (i.e., an estimate of the spectral density) from time series. There are a couple issues that need to keep in mind:
+
+- `spectrum` calculates the frequency axis in terms of cycles per sampling interval; it makes more sense to convert to cycles per unit time (so divide by the sampling interval)
+- the spectrum will be far more interpretable if it is smoothed
+    - Use the argument `spans`, which specifies the parameter(s) for the what is known as the modified Daniell kernel for smoothing the spectrum 
+    - Modified Daniell kernel is essentially just a running average (see code below for a sense of what these parameters do)
+    - No hard-and-fast rule for how to do this (try a couple different values)
+    - the higher the number of spans, the more smoothing and the lower the peaks of the spectrum will be
+- the default for `spectrum` is to calculate the spectrum on a log-scale 
+    - Use the argument `log="no"` to change this default
+- The spectrum needs to be multiplied by 2 to make it actually equal to variance
+
+```{r,cache=TRUE}
+# what is the spans argument doing?
+# scalar argument
+kernel("modified.daniell",2)
+# vector argument
+kernel("modified.daniell",c(1,1))
+mspect <- spectrum(meas$Cases, log="no", spans=c(2,2), plot=FALSE)
+delta <- 1/12
+specx <- mspect$freq/delta
+specy <- 2*mspect$spec
+plot(specx, specy, xlab="Period (years)", ylab="Spectral Density", type="l")
+```
+
+There is a very clear peak at one year.
+
+## Dengue Example
+
+Cazellas et al. (2005): Significant association between El Niño and dengue incidence in Bangkok and other parts of Thailand. However, it’s complicated. Bangkok shows two modes, one yearly and one that is 2-3 yearly. Sometimes the 2-3 year period is dominant in Bangkok, but the 2-3 year period is never dominant in the rest of Thailand.
+
+The periodicity (also found in Peru, Bangladesh, etc.) is believed to be due to intrinsic dynamics of the infection, i.e., waxing and waning of susceptible pool. Similar to dynamics of (e.g.) measles in UK (Grenfell et al. 2001).
+
+We can use data made available by the [NOAA Dengue Forecasting Project](http://dengueforecasting.noaa.gov/) to evaluate the spectral properties of dengue cases in San Juan, Puerto Rico. 
+
+
+```{r, cache=TRUE}
+library(zoo)
+dengue <- read.csv("https://web.stanford.edu/class/earthsys214/data/San_Juan_Training_Data.csv", header=TRUE)
+tcases <- zoo(dengue$total_cases, as.Date(dengue$week_start_date))
+plot(tcases, xlab="Date", ylab="Total Cases")
+## now all cases
+acases <- zoo(dengue[,4:7],as.Date(dengue$week_start_date))
+plot(acases, xlab="Date", ylab=list("Dengue 1","Dengue 2","Dengue 3","Dengue 4"), main="")
+```
+
+- Power spectrum for the total cases
+- Truncate at first 100 values for plotting because spectrum is totally flat for more than about 3 years
+
+```{r,cache=TRUE}
+dspect <- spectrum(dengue$total_cases, log="no", spans=c(5,5), plot=FALSE)
+delta <- 7/365
+specx <- dspect$freq/delta
+specy <- 2*dspect$spec
+plot(specx[1:100], specy[1:100], xlab="Period (years)", ylab="Spectral Density", type="l")
+```
+
+
+
+
+# Coherence
+
+Coherence is a time-series measure similar to correlation. It's a measure of recurrent phenomena (i.e., waves). Two waves are coherent if they have a constant relative phase.
+
+Most approaches to finding periodic behavior (including coherence) assume that the underlying series are stationary, meaning that the mean of the process remains constant. Clearly, this is not such a good assumption when the goal of an analysis is to study environmental change. Wavelets allow us to study localized periodic behavior. In particular, we look for regions of high-power in the frequency-time plot.
+
+We can demonstrate with a toy example from the [`biwavelet`](http://tgouhier.github.io/biwavelet/) package. We know that the Multivariate ENSO Index (MEI) and the North Pacific Gyre Oscillation (NPGO) experience coherent fluctuations with a frequency of approximately 5-12 years. A small data set is included with `biwavelet` that includes monthly values of these two series from 1950-2009.
+
+```{r, cache=TRUE}
+data("enviro.data")
+head(enviro.data)
+mei <- with(enviro.data, cbind(date,mei))
+npgo <- with(enviro.data, cbind(date,npgo))
+## not run because it takes too long
+## set nrands small to speed things up (default = 300)
+## mg.wtc <- wtc(mei,npgo, nrands = 100)
+## plot(mg.wtc, plot.cb=TRUE)
+```
+
+![Wavelet coherence of MEI and NPGO data](figures/wavelet_coherence.png)
+
+## Coherence of Dengue 1 and Dengue 2 in San Juan?
+
+Is there coherence between the serovars of dengue in San Juan, PR? We can check the coherence of dengue 1 and dengue 2 time series. First, check out the cross-correlation function for the series of dengue 1 and dengue 2 infections.
+
+```{r,cache=TRUE}
+ccf(dengue$denv1_cases,dengue$denv2_cases, main="")
+```
+
+There is clearly significant cross-correlation for short lags. Now we can investigate the wavelet coherence for the two series.
+
+```{r, cache=TRUE, message=FALSE}
+library(biwavelet)
+## biwavelet requires input of nx2 matrices
+len <- length(dengue$denv1_cases)
+t1 <- cbind(dengue$week_start_date,dengue$denv1_cases)
+t2 <- cbind(dengue$week_start_date,dengue$denv2_cases)
+## don't want to actually do this because it takes a long time!
+#d1d2.wtc <- wtc(t1,t2)
+#plot(d1d2.wtc)
+```
+
+![Dengue 1 and dengue 2 coherence.](figures/dengue1-2-coherence.png)
+
+Seems like there is some significant coherence at an approximately 3-year period particularly in the early 90s, around 2000, and then in 2007-2008.
+
+## Demonstration of How Wavelets Work
+
+Wavelets are like spectral analysis, but they work at multiple scales.  Suppose we have a series $x(t)$. The wavelet transform involves multiplying the series by the wavelet which has been stretched to various scales spanning the series and summing this product. The scale is determined by the parameter $\tau$. Note how conceptually similar this is to calculating the covariance of two variables.
+
+$$ W_x(a,\tau) = \frac{1}{\sqrt{a}} \int_{-\infty}^{\infty} x(t)\psi^* \left(\frac{t-\tau}{a}\right) dt = \int_{-\infty}^{\infty} x(t)\psi^*_{a,\tau}(t) dt $$
+
+```{r,cache=TRUE,fig.cap="Morlet Mother Wavelet."}
+library(biwavelet)
+morlet <- function(x) exp(-x^2/2) * cos(5*x)
+x <- seq(-4,4,length=1000)
+y <- morlet(x)
+plot(x,y,type="l",  lwd=3, col="purple4",
+     ylim=c(-1.1,1.1),
+     xlab="",ylab=expression(psi[a,tau](t)))
+abline(h=0, lwd=0.5, lty=3)
+```
+
+Now generate a periodic series and overlay on the mother wavelet.
+
+```{r,cache=TRUE}
+f <- expression(cos(2*pi*x)*exp(-pi*x^2))
+plot(x,y,type="l",  lwd=3, col="purple4",
+     ylim=c(-1.1,1.1),
+     xlab="",ylab=expression(psi[a,tau](t)))
+abline(h=0, lwd=0.5, lty=3)
+lines(x,eval(f), lwd=2)
+```
+
+We can see that the wavelet captures this periodic variation pretty well. The wavelet transform of the signal (red) shows that most of the function lies above the $x=0$ line and its sum is strongly positive. 
+
+```{r, cache=TRUE}
+dx <- diff(x)
+dx <- c(dx,dx[999])
+
+plot(x, y*eval(f)*dx, type="l", lwd=3, col="red", xlab="x",
+     ylab=expression(paste("integrand, ", psi[a,tau](t), x(t))))
+abline(h=0, lty=2)
+```
+
+What happens when the signal is not well matched by the wavelet? In the next figure, the signal in black is largely random with respect to the mother wavelet. When we plot the wavelet transform of this signal (red), there is approximately an equal amount of area above and below the the $x=0$ line and the sum is effectively zero.
+
+```{r,cache=TRUE}
+# another function
+f1 <- expression(cos(12*pi*x)*exp(-pi*x^2))
+plot(x,y,type="l",  lwd=3, col="purple4",
+     ylim=c(-1.1,1.1),
+     xlab="",ylab=expression(psi[a,tau](t)))
+abline(h=0, lwd=0.5, lty=3)
+lines(x,eval(f1), lwd=2)
+
+plot(x, y*eval(f1)*dx, type="l", lwd=3, col="red", xlab="x",
+     ylab=expression(paste("integrand, ", psi[a,tau](t), x(t))))
+abline(h=0, lty=2)
+```
+
+
+

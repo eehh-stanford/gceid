@@ -1,0 +1,117 @@
+---
+title: "Sensitivities for Multi-Host Epidemics"
+author: "James Holland Jones"
+date: "04/12/2019"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+bibliography: ro.bib
+csl: chicago-author-date-16th-edition.csl
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Working with $2 \times 2$ Matrices
+
+When you're going to construct a lot of next-generation matrices, it can be handy to write a quick function to facilitate this. The `R` function `matrix()` requires an input vector (subject to standard recycling rules), the number of rows, and number of columns. Most people will also want to add the argument `byrow=TRUE` to override the default columnwise filling of matrices (a holdover from FORTRAN).
+
+```{r, cache=TRUE}
+make2x2 <- function(a,b,c,d) matrix( c(a,b,c,d), nr=2, nc=2, byrow=TRUE)
+(g <- make2x2(15,2,4,8))
+eigen(g)
+```
+
+
+# The Fastest Way to Reduce $R_0$ in a Multi-Host Epidemic
+
+We want to bring $R_0$ below one in a multi-host epidemic. Clearly, reducing the number of infections in any cell in the next-generation matrix will reduce $R_0$, but which will do it the most for the smallest effort? To do this, we calculate the *sensitivities* of $R_0$ to a change in the various entries of the next-generation matrix. These are the partial derivatives (i.e., the rate of change in $R_0$ with respect to $g_{ij}$ holding everything else constant).
+
+\[ s_{ij} = \frac{\partial R_0}{\partial g_{ij}} \]
+
+```{r, cache=TRUE}
+calc.sens <- function(G){
+  ev <- eigen(G)
+  lmax <- which(Re(ev$values)==max(Re(ev$values)))
+  U <- ev$vectors
+  u <- abs(Re(U[,lmax]))
+  V <- solve(Conj(U))
+  v <- abs(Re(V[lmax,]))
+  
+  s <- v%o%u
+  return(s)
+}
+```
+
+## Chagas Disease Example
+
+Consider a three-species model introduced by @cohen_gurtler2001. The three species included in this household-based model are humans, triatomine bugs, and dogs. Define $\mathbf{G}$:
+
+\[ \mathbf{G} = \left[ \begin{array}{ccc}
+            0 & g_{B \leftarrow D} & g_{B \leftarrow H} \\
+            g_{D \leftarrow B} & 0 & 0 \\
+            g_{H \leftarrow B}  & 0 & 0
+            \end{array} \right],
+\]
+
+where (e.g.) $g_{B \leftarrow D}$ is the dog-infecting-bug  reproduction number.
+
+@cohen_gurtler2001 give some data that allow us to estimate the next generation matrix. We fill in the missing parameters with educated guesses (more on this later) and calculate the sensitivities.
+
+```{r, cache=TRUE}
+G <- matrix( c(0,122.01,7.47, 0.1992,0,0, 0.1992,0,0), nr=3, nc=3, byrow=TRUE)
+# first, what is R_0?
+eigen(G)$values
+(S <- calc.sens(G))
+```
+
+We can see that $R_0 = 5.08$ and that, by far, the element of $\mathbf{G}$ with the highest sensitivity is the bug-to-dog entry. Note that the ordering of the eigenvalues in the output actually lists the negative one first. This is why can't just take the first eigenvalue but need the line in the code to find the dominant eigenvalue (i.e., the one that is positive, real, and strictly greater than all the others).
+
+# Elasticities
+
+Sensitivities tell us about the absolute change in $R_0$ given a small change in one of the entries in $\mathbf{G}$. Sometimes we want to know about the proportional sensitivities though. Use a trick invented by Carl Jacobi in the mid nineteenth century.  Define a proportional sensitivity (or *elasticity*) as
+
+\[ e_{ij} = \frac{g_{ij}}{R_0} \cdot \frac{\partial R_0}{\partial
+  g_{ij}} = \frac{\partial \log(R_0)}{\partial \log(g_{ij})}.\]
+
+Elasticities answer the following question: if $g_{ij}$ increases by 1%, by what percentage will $R_0$ increase? Elasticities also have the convenient property of summing to one across all elements of the next generation matrix. They thus represent the fraction of the total potential reduction embodied in each cell of the next generation matrix (assuming everything else stays the same).
+
+```{r, cache=TRUE}
+calc.elas <- function(G){
+  ev <- eigen(G)
+  lmax <- which(Re(ev$values)==max(Re(ev$values)))
+  R0 <- ev$values[lmax]
+  U <- ev$vectors
+  u <- abs(Re(U[,lmax]))
+  V <- solve(Conj(U))
+  v <- abs(Re(V[lmax,]))
+  
+  s <- v%o%u
+  e <- s*G/R0
+  return(e)
+}
+
+(E <- calc.elas(G))
+```
+  
+So our elasticity matrix looks like this:
+
+\[ \mathbf{E} = \left[ \begin{array}{ccc}
+0.00 & 0.47 & 0.03 \\
+0.47 & 0.00 & 0.00 \\
+0.03 & 0.00 & 0.00 
+ \end{array} \right].
+\]
+
+Transmission from bugs to dogs and dogs to bugs accounts for
+more than 94% of the elasticity. Clearly, we need to stop the canine transmission cycle!
+
+# Going Further
+
+@caswell2019 provides a comprehensive account of the use of sensitivity analysis in matrix population models. The book is open-access.
+
+# References
+
+

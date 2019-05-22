@@ -1,0 +1,64 @@
+---
+title: 'Disease Ecology Book: Outline'
+author:
+- affiliation: Stanford University 
+  name: James Holland Jones
+- affiliation: Stanford University
+  name: John J. Openshaw
+date: "12 May 2019"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+# Chapters
+
+**Introduction**: Diseases as Complex Systems: complexity, disease triad, Tinbergen, global-change themes (climate change, land-use change/degradation, mobility, inequality, changed selective landscape), $R_0$-thinking
+
+## Section 1: Theoretical and Methodological Background
+
+**Ecological Background**: scaling and thermal ecology, competition, predation, Lotka-Volterra, top-down/bottom-up regulation, metapopulations/island biogeography, stability/complexity, competitive release, co-existence isoclines, Price on parasites (ecology), dilution effect, abiotic pulse hypothesis, density-dependence vs. frequency-dependence
+
+**Evolutionary Background**: phylogenetics, mechanisms of evolutionary change (mutation, drift, migration, selection), patterns of change (stabilizing/directional/disruptive selection), fitness, force of selection, extinction/persistence, Price on parasites (evolution)
+
+**Epidemiological Background**: measures of disease (prevalence, incidence, attack rate, risk ratios, odds ratios) measures of association, causation, $R_0$, dynamics (SIR, etc.), critical vaccination threshold, time series
+
+**Social Background**: social interaction, mixing, networks, concurrency, clustering, mobility/migration, poverty traps, conflict/displacement
+
+## Section 2: Case Studies
+
+**Ebola (West Africa, Congo)**: land-use change, mobility, inequality, changed selective environment
+
+**HIV**: land-use change, mobility, inequality, changed selective environment
+
+**Malaria Re-Emergence (East African Highlands, Brazilian Amazon)**: climate change, mobility, changed selective landscape
+
+**Plague Re-Emergence (Madagascar)**: climate change, land-use change, changed selective environment
+
+**Lyme disease (North America)**: land-use change
+
+**Cholera (Bangladesh, Haiti, Yemen)**: climate change, mobility, inequality
+
+**Dengue**: mobility, changed selective landscape
+
+
+## Section 3: The Future
+
+**An Increasingly Variable World**: Climate change is warming the world, but it is also making in more variable.
+
+**An Increasingly Mobile World**: Human mobility is increasing and climate change will amplify it
+
+**An Increasingly Unequal World?** Mixed bag. We should work on keeping runaway inequality in check because it sets the stage for infectious disease. Analogy with core for bacterial STIs or source-sink dynamics in metapopulations. 
+
+**Evolution Guides Our Thinking**: AMR, evolution-proof treatments. We tend not to think about evolution; that's why it's important to end on a chapter that suggests that we need to think about evolution and how human activities change the selective landscape for pathogens. Every emergence is an evolutionary event.
+
+
+

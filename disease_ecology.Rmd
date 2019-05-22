@@ -1,0 +1,21 @@
+---
+title: "Disease Ecology Methods"
+author: "James Holland Jones"
+date: "12/3/2017"
+output: 
+  slidy_presentation:
+    md_extensions: +definition_lists
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Some Definitions
+
+Sylvatic 
+
+:    

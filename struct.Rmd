@@ -1,0 +1,100 @@
+---
+title: "Epidemic Curves for Structured Populations"
+author: "James Holland Jones"
+date: "05/11/2019"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Mixing
+
+Epidemic models, like the SIR model, involve dyads of individuals -- one susceptible and one infectious -- coming together at a specified rate and generating a new infection with a specified probability. We say that a population is *well-mixed* if all infectious-susceptible dyads in the population have approximately the same probability of occurring. This is obviously a very strong assumption. For example, as a student at Stanford, you are probably much more likely to encounter another Stanford student infected with the flu than you are an infected student at, say, the University of South Carolina. 
+
+We can relax the assumption of a population being well-mixed by adding structure to it. The resulting model will be characterized by *structured mixing*, meaning that there are potentially quite different probabilities associated with dyads that can be formed from the various elements of structure. This structure can represent geographic location (e.g., Palo Alto, CA vs. Columbia, SC) or it can represent various mechanisms by which social or cultural attributes affect the way people interact, e.g., race/ethnicity, age, gender, occupation, social class, income quartile, etc. 
+
+Whatever the nature of the structuring, there are certain generic features of structured epidemic models. First, structuring slows down epidemics. Second, structuring typically leads to smaller epidemics. 
+
+
+We can construct a toy example to show this qualitative behavior. We will compare two SIR models, one well-mixed and the other structured into two asymmetrically-mixing groups. For the well-mixed model, we will assume that the effective contact rate is $\beta=0.3$ and the removal rate of infectious individuals is $\nu=0.2$. For the structured model, we will assume that the average effective contact rate is the same $\bar{\beta}=0.3$, but that there is asymmetry in the contact rates such that $\beta_{11} =0.5$, $\beta_{12} =0.15$, $\beta_{21} =0.05$, and $\beta_{22} =0.5$, where $\beta_{ij}$ is the rate of transission from infectious individuals in class $j$ to susceptible individuals in class $i$. Assume that the removal rate is the same for both classes, $\nu = 0.2$.
+
+Plot the epidemic (i.e., incidence) curves for the two models. 
+
+```{r, cache=TRUE, echo=FALSE, message=FALSE}
+library(deSolve)
+
+## SIR model
+sir <- function(t,x,parms){
+  S <- x[1]
+  I <- x[2]
+  R <- x[3]
+  C <- x[4]
+  with(as.list(parms),
+{
+  S.dot <- -beta*S*I/N
+  I.dot <- beta*S*I/N - nu*I
+  R.dot <- nu*I
+  C.dot <- beta*S*I/N              ## cumulative cases
+  res <- c(S.dot,I.dot,R.dot,C.dot)
+  list(res)
+})
+}
+## SIR model with two subpopulations
+hsir <- function(t,x,parms){
+    S1 <- x[1]
+    I1 <- x[2]
+    R1 <- x[3]
+    S2 <- x[4]
+    I2 <- x[5]
+    R2 <- x[6]
+    C <- x[7]
+    with(as.list(parms),
+         {
+             S1.dot <- -S1*(beta11*I1 + beta12*I2)/N
+             I1.dot <- S1*(beta11*I1 + beta12*I2)/N - nu*I1
+             R1.dot <- nu*I1
+             S2.dot <- -S2*(beta22*I2 + beta21*I1)/N
+             I2.dot <- S2*(beta22*I2 + beta21*I1)/N - nu*I2
+             R2.dot <- nu*I2
+             C.dot <-  S1*(beta11*I1 + beta12*I2)/N + S2*(beta22*I2 + beta21*I1)/N       ## cumulative cases
+             res <- c(S1.dot,I1.dot,R1.dot,S2.dot,I2.dot,R2.dot,C.dot)
+             list(res)
+         })
+}
+
+times <- seq(0,300,1)
+N <- 1000000
+x0 <- c(N/2,0.5,0,N/2,0.5,0,1)
+parms <- c(N=N, beta11=0.5, beta12=0.15, beta22=0.5, beta21=0.05, nu=1/5)
+
+## ODE evals
+stateMatrix <- ode(y=x0, times, hsir, parms)
+colnames(stateMatrix) <- c("Time","S1","I1","R1","S2","I2","R2","C")
+
+### Compare to unstructured model
+y0 <- c(N,1,0,1)
+parms0 <- c(N=N, beta=0.3, nu=1/5)
+stateMatrix1 <- ode(y=y0, times, sir, parms0)
+colnames(stateMatrix1) <- c("Time","S","I","R","C")
+
+## plot epidemic curves
+plot(stateMatrix1[,"Time"], stateMatrix1[,"I"], type="l", lwd=3, col="blue",
+     xlab="Time", ylab="Number of Cases")
+lines(stateMatrix[,"Time"], (stateMatrix[,"I1"] + stateMatrix[,"I2"]), type="l", lwd=3, col="red")
+legend("topleft", c("Unstructured","Structured"), col=c("blue","red"), lwd=3)
+```
+
+Note that the structured epidemic is slower to take off and infects a smaller fraction of the population even though it technically has a higher $R_0$.
+
+```{r, cache=TRUE}
+## R_0 = beta/nu = 1.5
+0.3 * 5
+## R_0 dominant eigenvalue of G = 2.93
+G <- matrix(c(0.5, 0.15, 0.05, 0.5)*5, nr=2, nc=2, byrow=TRUE)
+eigen(G)$values
+```

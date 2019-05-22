@@ -1,0 +1,373 @@
+---
+title: "Fitting Epidemic Models to Data"
+author: "James Holland Jones"
+date: "02/19/2018"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    md_extensions: +definition_lists
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Introduction
+
+## Fitting a Logistic Model Using Least-Squares Minimization
+
+We'll start with the basics. We have a simple population model and we want to fit the parameters with observed data. Parameter fitting is the process through which we confront a process-based model with data and attempt to specify the parameters of the process-based model in such a way that some model-fit criterion is best fulfilled. In general terms, we will specify some sort of **Loss Function** that tells us how well the parameters of our model generate predictions for the process we are trying to model. Having specified a loss function, we
+then use the techniques of optimization to find a combination of parameters that minimize it. There are a variety of loss functions we could potentially use. The classical loss function is the sum of squared deviations or, more casually, "least squares."
+
+Consider the logistic model for density-dependent population growth:
+
+\[ \frac{dN}{dt} = rN (1 - N/K). \]
+
+Unlike many of the more complex epidemic models we use, the logistic equation has an analytical solution, which we can solve for by using integration by partial fractions. The solution is just a logistic (i.e., S-shaped) curve:
+
+\[ N(T) = \frac{N(0)e^{rT}}{1+N(0)(e^{rT}-1)/K}.  \]
+
+We'll use this for the parameter estimation since population time-series are typically given by total population size, not the change in this size.
+
+```{r, cache=TRUE}
+fit.logistic <- function(par,y){
+    r <- par[1]; k <- par[2]
+    t <- y[,2]
+    n <- y[,1]
+    n0 <- y[1]
+    tmp <- n[1] *exp(r*t)/(1 + n[1] * (exp(r*t)-1)/k)
+    sumsq <- sum((n - tmp)^2)
+}
+``` 
+
+Following Raymond Pearl, we will fit the model to the total population estimates, drawn from the decennial census, of the United States, 1790-1930. The logistic model is a two-parameter population model, so we use `optim()` to fit the parameters. We need to pass `optim()` some initial guesses for the two parameters. For the intrinsic rate of increase, $r$, we will simply use the empirical value of the growth rate between 1790 and 1930. This is simply the difference in the natural logarithms of the census population size divided by the number of years (140). Data for the total US population size derived from the decennial census (in millions) is entered as a vector, `usa`.
+
+```{r, cache=TRUE}
+usa <- c(3.929214,   5.308483,   7.239881,   9.638453,  12.866020,  
+         17.866020, 23.191876,  31.443321,  38.558371,  50.189209,
+         62.979766,  76.212168, 92.228496, 106.021537, 123.202624,
+         132.164569, 151.325798, 179.323175, 203.302031, 226.542199,
+         248.709873, 281.421906, 308.745538)
+year <- seq(1790,2010,10) # decennial census
+r.guess <- (log(usa[15])-log(usa[1]))/140
+k.guess <- usa[15] #1930 US population
+par <- c(r.guess,k.guess)
+
+census1930 <- cbind(usa[1:15], seq(0,140,by=10))
+usa1930.fit <- optim(par,fit.logistic,y=census1930)
+usa1930.fit$par
+```
+
+Now that we have estimated the parameters of the logistic growth model, we can plot the predicted curve and then overlay the data and see how well we did. 
+
+```{r, cache=TRUE}
+logistic.int <- expression(n0 * exp(r*t)/(1 + n0 * (exp(r*t) - 1)/k))
+r <- usa1930.fit$par[1]
+k <- usa1930.fit$par[2]
+n0 <- usa[1]
+t <- seq(0,220,by=10)
+plot(seq(1790,2010,by=10), usa, type="n", xlab="Year", 
+     ylab="Total Population Size (Millions)")
+lines(seq(1790,2010,by=10), eval(logistic.int), lwd=2, col=grey(0.85))
+points(seq(1790,2010,by=10),usa, pch=16, col="black")
+abline(v=1930, lty=3, col="red")
+```
+
+Well, it fits pretty well until 1930 at least! The logistic model is a terrible model for the population dynamics of a population of a nation-state like the United States. Arguably, it's a terrible model for just about any population since the model is phenomenological and not mechanistic. 
+
+# Maximum Likelihood
+
+## Quick Introduction to Likelihood
+
+Maximum likelihood estimation is a unified framework for statistical inference. Likelihood is the hypothetical  probability that an event that has occurred would be observed given a particular model. We can write this as  $P(D | H)$, which we read as "the probability of the data given the hypothesis." While probability refers to  the occurrence of future events, likelihood addresses events that have already occurred. The *likelihood function* is the probability density for the occurrence of a collection of events.
+
+For independent observations, the total likelihood is simply the product of the likelihoods of the individual  observations. As a result of this, likelihoods can get very small, so small, in fact, that they can exceed a  computer's capacity to represent them. It is therefore standard to work not with the likelihood (which we are  trying to maximize) but rather with the negative-log-likelihood (which we try to minimize). Not that the logarithmic transformation is monotone so will preserve any ordering. 
+
+\subsection{Single Parameter MLE}
+
+```{r, cache=TRUE}
+plague <- read.table("https://web.stanford.edu/class/earthsys214/data/us.plague.txt", header=TRUE)
+names(plague)
+table(plague$cases)
+range(plague$cases)
+mean(plague$cases)
+median(plague$cases)
+var(plague$cases)/mean(plague$cases) # var == mean for Poisson r.v.
+plot(plague, type="l", xlab="Year", ylab="Plague Cases")
+``` 
+
+We can calculate the maximum likelihood estimator of the distribution of plague cases in the US. To do this, we will make the rather large assumption that the number of cases is independent of previous years. This may or may not be reasonable, but it's a place to start. In order to  calculate the MLE, we need to write a function that calculates the negative-log-likelihood. This function takes two arguments, the data `x` and the model parameter `lambda`. Because the Poisson distribution has only one parameter, the optimization routine that we use in `R` is `optimize()`. The arguments that `optimize()` requires are the function which calculates the negative-log-likelihood, a range over which to search for the  minimum, and the data to use in our likelihood function. 
+
+```{r, cache=TRUE}
+f <- function(x,lambda) -sum(log(dpois(x,lambda))) 
+( aaa <- optimize(f, c(1,20), x=plague$cases) )
+```
+
+
+We can see that our MLE is $\hat{\lambda} = 10.24$ and the value of the minimum value of the objective function  is 199.65. We can visualize the negative-log-likelihood.
+
+```{r, cache=TRUE}
+ll <- rep(0,20)
+for(i in 1:20) ll[i] <- -sum(log(dpois(plague$cases,i)))
+plot(1:20, ll, type="l", xlab="year", ylab="negative log-likelihood")
+abline(h=aaa$objective, lty=3)
+```
+
+### Multiple-Parameter MLE
+
+Consider the case of estimating the mean and standard deviation of a normal variate. We will use a sample of  1000 US men's heights, measured in inches, drawn from the National Health and Nutrition Evaluation Study (NHANES). These data are stored in a plain text file called `heights.txt`, which we will read into `R` using the `scan()` function. One potential gotcha with these data is that there are `NA`s present that arise from the fact that not everyone in NHANES reports a height. We will remove the `NA`s before proceeding.
+
+```{r, cache=TRUE}
+heights <- scan("https://web.stanford.edu/class/earthsys214/data/heights.txt")
+table(heights)
+hist(heights,20)
+sum(is.na(heights))
+heights <- heights[!is.na(heights)]
+```
+
+We can see that the distribution of these heights is fairly symmetrical, generally bell-shaped, and far away from zero, supporting the idea that a normal distribution may be appropriate. 
+
+First, we need to write a function to calculate the negative-log-likelihood. The heavy lifting of this function  is carried out using `R`'s built-in function for estimating a normal density `dnorm()`. Everything else is for  convenience. First we name the parameters of the vector `theta`. This makes the call to `dnorm()` more readable later. The next line is there to keep the optimizer from looking at values of the standard deviation  that are less than zero (a value definitely doesn't minimize an objective function it that function is infinite!). The function will work without this line, but it will return worrisome warning message about `NaNs` being produced. It doesn't affect the estimation but it's easy enough to make go away with that one line of code. The next line calculates the log-likelihood and the last line returns the negative of this value.
+
+```{r, cache=TRUE}
+f <- function(theta,x) {
+    mu <- theta[1]; sigma <- theta[2]
+    if (sigma<0) return(Inf) # ensure sd is positive
+    ll <- sum( dnorm(x, mu, sigma, log=TRUE) )
+    return(-ll)
+}
+```
+
+We use the function `optim()` to minimize the negative-log-likelihood. `optim()` requires three arguments: the function (which we just wrote), the data, and starting values for the optimization routine. We can give it some  starting values that are in the neighborhood of the sample mean and standard deviation. For more complex models, choosing starting values can be a bit of an art. In addition to the three required arguments, we add  the optional `hessian=TRUE` to get the Hessian matrix, which is the matrix of partial second derivatives of the model parameters. This matrix can be used to estimate the standard errors of the estimated parameters.
+
+```{r, cache=TRUE}
+theta0 <- c(69,3)
+out <- optim(theta0, f, hessian=TRUE, x=heights)
+out$par
+hist(heights,20, freq=FALSE, col=grey(0.85),
+     xlab="Height (in)", ylab="Density", main="")
+## this makes the curve smooth
+xpredict <- seq(range(heights)[1], range(heights)[2],length=100)
+lines(xpredict, dnorm(xpredict, out$par[1], out$par[2]), col="red", lwd=2)
+``` 
+
+We see that the estimates are approximately $\hat{\mu}=69.03$ and $\hat{\sigma}=3.11$. We can use these estimates to draw a predicted normal density on top of the empirical histogram of our sample.
+
+One of the advantages of using maximum likelihood estimation is that the MLEs are asymptotically normally distributed. We can construct confidence intervals for our parameter estimates using standard normal theory. The inverse of the Hessian matrix gives us the Fisher Information Matrix. The square root of the diagonal  elements of this matrix give approximate standard errors of our estimates and it is these standard errors that allow us to calculate 95% confidence intervals. 
+
+```{r, cache=TRUE}
+muhat <- out$par[1]
+sigmahat <- out$par[2]
+fisher <- solve(out$hessian)
+(see <- sqrt(diag(fisher)))
+( ci.mu <- c( muhat-(1.96*see[1]), muhat+(1.96*see[1]) ) )
+( ci.sig <- c( sigmahat-(1.96*see[2]), sigmahat+(1.96*see[2]) ) )
+```
+Pretty precise. 
+
+### A More Complex Example
+
+The data set `faithful` is part of the R base package. It contains data on the eruptions of the Old Faithful  geyser in Yellowstone Park, Wyoming. There are two columns: (1) numeric eruption time in mins and (2) waiting time between eruptions. We can plot the waiting time distribution:
+
+```{r, cache=TRUE}
+data(faithful)
+hist(faithful$waiting, main="", xlab="Waiting Time (min)", 
+     freq=FALSE, col=grey(0.65), ylim=c(0,0.05))
+``` 
+
+There is a clear bimodality to this histogram. We can write a simple function for the mixture of two normals.  There are five parameters to this distribution: two means, to standard deviations, and one mixture parameter. We put all together in a vector called `theta` to simplify passing parameters to the optimization function and then unpack them to make the code readable. We then need to set some starting parameters for the optimization. There is no rule for how to do this and, unfortunately, the starting parameters can really make a difference (more later). We will again use the `R` function `optim()` to do numerical optimization of multiple parameters
+simultaneously.
+
+First, define the likelihood for our mixture model:
+
+```{r, cache=TRUE}
+f <- function(theta,x) {
+  mu1 <- theta[1]
+  mu2 <- theta[2]
+  sigma1 <- theta[3]
+  sigma2 <- theta[4]
+  pi <- theta[5]
+  if (sigma1<0 | sigma2<0 | pi <0 | pi>1) return(Inf) #validate the params
+  ll <- sum( log(pi*dnorm(x,mu1,sigma1) + (1-pi)*dnorm(x,mu2,sigma2)) )
+  return(-ll)
+}
+``` 
+
+Now do the optimization, overlay the model predictions on the empirical histogram (as well as a
+kernel density estimate), and calculate the standard errors of the estimates:
+
+```{r, cache=TRUE}
+theta0 <- c(55,85,10,10,0.5)
+( out1 <- optim(theta0,f,method="BFGS", hessian=TRUE, x=faithful$waiting) )
+##
+theta <- out1$par
+mu1<-theta[1]
+mu2<-theta[2]
+sigma1<-theta[3]
+sigma2<-theta[4]
+pi<-theta[5]
+range(faithful$waiting)
+x <- seq(40,100,length=1000)
+hist(faithful$waiting, main="", xlab="Waiting Time (min)", 
+     freq=FALSE, col=grey(0.65), ylim=c(0,0.05))
+lines(x, pi*dnorm(x,mu1,sigma1)+(1-pi)*dnorm(x,mu2,sigma2), 
+      col="red", lwd=2)
+lines(density(faithful$waiting), col="blue")
+## standard errors
+fisher <- solve(out1$hes)
+sqrt(diag(fisher))
+```
+
+We get a pretty good fit overall with this approach. I will just add a word of warning here that this is unlikely to generalize for fitting mixture distributions. In general, the best way to fit mixture distributions is not through direct maximization of the likelihood but using the expectation-maximization (EM) algorithm.
+
+## Fitting a Simple Epidemic Model Using Maximum Likelihood
+There are advantages of maximum likelihood estimation. Consistent approach to statistical inference. Minimum variance unbiased estimation. Asymptotic normality of MLEs. Likelihood is also an essential component of Bayesian estimation, which opens up a whole world of possibility.
+
+An excellent place to start [Stevens (2009)](http://books.google.com/books?id=UcVW-PTUdJEC&dq=stevens+bombay+R+sirLL&source=gbs_navlinks_s).
+
+We generally calculate the maximum likelihood estimators (MLEs) using the R function`optim()`, R's general-purpose multivariate optimizer. [Ben Bolker](https://ms.mcmaster.ca/~bolker/) has written a R package,`bbmle`, which adds some functionality and sensible defaults. 
+
+First, we need to define the epidemic model. We'll start with a simple SIR model. This is a system of three ordinary differential equations. The R package that we use to numerically solve these equations is`deSolve`. In addition to the three equations for $\dot{S}$, $\dot{I}$ and $\dot{R}$, we will add a bookkeeping variable which simply accumulates the total number of infections over the course of the epidemic. This is a handy thing that sometimes allows us to better match available data. Cases are often reported only in cumulative fashion.
+
+```{r, cache=TRUE}
+require(deSolve)
+sir <- function(t,x,parms){
+    S <- x[1]
+    I <- x[2]
+    R <- x[3]
+  with(as.list(parms),
+{
+    dS <- -beta*S*I
+    dI <- beta*S*I - nu*I
+    dR <- nu*I
+    res <- c(dS,dI,dR)
+  list(res)
+})
+}
+```
+
+To solve the system of equations, we need to pass the `deSolve` function `ode()` (which is itself just a wrapper for the workhorse function `lsoda()`). We need to pass `ode()` an initial vector of the state variables, the times over which integration takes place, the function which defines our ODEs, and a vector of parameters for the ODEs.
+
+```{r, cache=TRUE}
+N <- 1e4
+parms <- c(N=N,beta=0.0001, nu = 1/7)
+times <- seq(0,30,0.1)
+x0 <- c(N,1,0)
+stateMatrix <- ode(y=x0, times, sir, parms)
+colnames(stateMatrix) <- c("time","S","I","R")
+plot(stateMatrix[,"time"], stateMatrix[,"S"], type="l", lwd=2, 
+     xlab="Time", ylab="Population Size")
+lines(stateMatrix[,"time"], stateMatrix[,"I"], col="red", lwd=2)
+lines(stateMatrix[,"time"], stateMatrix[,"R"], col="green", lwd=2)
+legend("right", c("S","I","R"), col=c("black","red","green"), lwd=2)
+```
+
+
+```{r, cache=TRUE}
+bombay <- c(0, 4, 10, 15, 18, 21, 31, 51, 53, 97, 125, 183, 292, 390, 448,
+            641, 771, 701, 696, 867, 925, 801, 580, 409, 351, 210, 113, 65, 
+            52, 51, 39, 33)
+cumbombay <- cumsum(bombay)
+weeks <- 0:31
+plot(weeks, cumbombay, pch=16, xlab="Weeks", ylab="Cumulative Deaths")
+```
+
+
+
+Write the model likelihood. Assume a measurement model -- i.e., we have measured the value of the number of deaths with error, which we assume to be normally distributed. A process-error model might use a Poisson or negative binomial.
+
+The optimization routine is stupid -- it doesn't know that you can't have a negative transmission rate or that you can't have more people dying of an infection than actually contract it. Sometimes it is sensible to put  constraints on our parameters. While the parameters of our SIR model aren't necessarily probabilities, they are typically less than one and greater than zero (in fact, they have to be greater than zero). It makes sense to treat them effectively as probabilities (the interpretation of $\beta$, in particular, really depends on whether we are using a density-dependent or frequency-dependent transmission model).  We can use a logit-transformation (using the quantile function for the logistic distribution, `qlogis()`) to  ensure that $\beta$ and $\nu$ are probabilities. We pass the optimization function logit-transformed values which the function then back-transforms using `plogis()`. Similarly, for the population size and number of initial infections, we pass log-transformed values which the function back-transforms.
+
+```{r, cache=TRUE}
+require(bbmle)
+# likelihood function
+sirLL <- function(lbeta, lnu, logN, logI0) {
+    parms <- c(beta=plogis(lbeta), nu=plogis(lnu))
+    x0 <- c(S=exp(logN), I=exp(logI0), R=0)
+    out <- ode(y=x0, weeks, sir, parms)
+    SD <- sqrt(sum( (cumbombay-out[,4])^2)/length(weeks) )
+    -sum(dnorm(cumbombay, mean=out[,4], sd=SD, log=TRUE))
+}
+# minimize negative-log-likelihood
+fit <- mle2(sirLL, 
+            start=list(lbeta=qlogis(1e-5), 
+                lnu=qlogis(.2), 
+                logN=log(1e6), logI0=log(1) ),  
+            method="Nelder-Mead",
+            control=list(maxit=1E5,trace=0),
+            trace=FALSE)
+
+summary(fit)
+theta <- as.numeric(c(plogis(coef(fit)[1:2]),
+                  exp(coef(fit)[3:4])) )
+```
+
+
+This can take a **very** long time. I actually recommend making `trace=2` within the `control` argument. This will provide feedback at the command line about the progress of the optimization. I suppress it here because it would run onto multiple pages of the R Markdown document. 
+
+```{r, cache=TRUE}
+parms <- c(beta=theta[1], nu = theta[2])
+times <- seq(0,30,0.1)
+x0 <- c(theta[3],theta[4],0)
+stateMatrix1 <- ode(y=x0, times, sir, parms)
+colnames(stateMatrix1) <- c("time","S","I","R")
+plot(stateMatrix1[,"time"], stateMatrix1[,"R"], type="l", lwd=2, 
+     xaxs="i", xlab="Time", ylab="Cumulative Deaths")
+points(weeks, cumbombay, pch=16, col="red")
+```
+
+```{r, cache=TRUE}
+fit2 <- mle2(sirLL, 
+             start=as.list(coef(fit)),
+             fixed=list(logN=coef(fit)[3], 
+                        logI0=coef(fit)[4]), 
+             method="Nelder-Mead",
+             control=list(maxit=1E5,trace=2),
+             trace=TRUE)
+summary(fit2)
+## mle2 produces an S4 object
+fit2@vcov
+```
+
+
+We can think of the outcomes as a process-error framework. Rather than using a normal model for the number of  deaths as measured with error, we model the deaths directly as a Poisson random variable.
+
+```{r, cache=TRUE}
+sirLL2 <- function(lbeta, lnu, logN, logI0) {
+    parms <- c(beta=plogis(lbeta), nu=plogis(lnu))
+    x0 <- c(S=exp(logN), I=exp(logI0), R=0)
+    out <- ode(y=x0, weeks, sir, parms)
+    -sum(dpois(cumbombay, lambda=out[,4], log=TRUE))
+}
+
+fit.pois <- mle2(sirLL2, 
+                 start=list(lbeta=qlogis(1e-5), 
+                     lnu=qlogis(.2), 
+                     logN=log(1e6), logI0=log(1) ),  
+                 method="Nelder-Mead",
+                 control=list(maxit=1E5,trace=0),
+                 trace=FALSE)
+
+summary(fit.pois)
+theta2 <- as.numeric(c(plogis(coef(fit.pois)[1:2]),
+                  exp(coef(fit.pois)[3:4])) )
+```
+
+Note that it doesn't do well with estimating standard errors and such. The estimate for $\beta$ is very similar to that from the normal likelihood model, but $\nu$ is very different! The removal rate estimate for the Poisson likelihood is seven times lower than that for the normal likelihood. It's always a good idea to plot. 
+
+```{r, cache=TRUE}
+parms <- c(beta=theta2[1], nu = theta2[2])
+times <- seq(0,30,0.1)
+x0 <- c(theta2[3],theta2[4],0)
+stateMatrix2 <- ode(y=x0, times, sir, parms)
+colnames(stateMatrix2) <- c("time","S","I","R")
+plot(stateMatrix2[,"time"], stateMatrix2[,"R"], type="l", lwd=2, 
+     xaxs="i", xlab="Time", ylab="Cumulative Deaths")
+lines(stateMatrix1[,"time"], stateMatrix1[,"R"], col=grey(0.85), lwd=2)
+points(weeks, cumbombay, pch=16, col="red")
+legend("topleft", c("Poisson", "Gaussian"), lwd=2, col=c("black",grey(0.85)))
+``` 
+
+The fit of the normal, measurement-error model seems pretty good. Not to rain on your parade, but you probably won't get a good fit if you try to fit a more complex model to actual data. It turns out that the nonlinearity at the heart of epidemic models (e.g., the mass-action $\beta SI$ term) makes the numerical work of fitting the MLE very finicky. The fundamental problem is that because of the nonlinearity inherent in epidemic models, any given realization of a model can move away from the most likely model in a hurry. This applies to situations where you are looking for a set of parameters for a simple model (as above) or when you simulate stochastic realizations of a more complex model and try to find the set of parameters that best match the trajectory of your data. There may be only a very narrow band of possible parameter combinations that give reasonable estimates for your model and there is no principled way of figuring out where that band might lie *a priori*.
+
+An approach that works much better than straight-up MLE estimation is known as *particle filtering* and [Aaron King](https://kinglab.eeb.lsa.umich.edu/) and colleagues at the University of Michigan have written a library, `pomp` which does particle filtering. Those notes forthcoming...

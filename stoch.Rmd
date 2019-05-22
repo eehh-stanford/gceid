@@ -1,0 +1,201 @@
+---
+title: "Stochastic Models of Infectious Disease"
+author: "James Holland Jones"
+date: "02/21/2018"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Introduction
+
+## Chain Binomial Model
+
+### Reed-Frost
+
+Introduced as a teaching tool at Johns Hopkins by by Lowell Reed and Wade Hampton Frost in the 1920s. We assume that all infectious individuals are equally likely to infect susceptible individuals and do so independently. The probability of that an infectious individual infects a susceptible is $\tau$. The number of new infections in the next generation is a Bernoulli random variable. The probability that a single infected individual will infect a susceptible is $1-(1-\tau)$ and, by the independence assumption, the total probability, given $I_{t}$ currently infectious in the population is $1-(1-\tau)^{I_t}$.
+
+\[
+I_{t+1} = S_t \mathcal{B}(1-(1-\tau)^{I_t})
+\]
+
+where $\mathcal{B}$ indicates a Bernoulli random variable. Based on the assumption of constant population size, the number of susceptibles at time $t+1$ is just:
+
+\[ 
+S_{t+1} = S_t - I_{t+1}
+\]
+
+For (very) small populations, we can calculate the probabilities of observing particular chains exactly. 
+
+### Greenwood
+
+The Greenwood chain-binomial model is very similar to Reed-Frost with the exception that the probability of infection is not a function of the number of infectious agents. The Greenwood model is appropriate for infections such as measles where infectious particles are aeresolized by coughing. 
+
+## Inference for Chain Binomial
+
+```{r, cache=TRUE}
+## Data on frequencies of outbreak sizes of the common cold in households of 5
+## From Becker (1989); Data originally from Heasman and Reid (1961)
+overcrowded <- c(rep(1,112), rep(2,35), rep(3,17), rep(4,11), rep(5,6))
+crowded <- c(rep(1,155), rep(2,41), rep(3,24), rep(4,15), rep(5,6))
+uncrowded <- c(rep(1,156), rep(2,55), rep(3,19), rep(4,10), rep(5,2))
+
+## likelihood function
+llik <- function(p,n,d) {
+    -sum(dbinom(d,prob=p,size=n,log=TRUE))
+}
+
+## need to use method="Brent" for 1D optimization
+## requires specification of lower/upper boudaries (as with optimize())
+out <- optim(par=0.5,fn=llik,n=5,d=crowded,method="Brent", lower=0.001,upper=0.999)
+out$par
+```
+
+Note that the expected value for a binomial random variable is $np$. The maximum likelihood estimator for $p$ will occur where $\bar{x}/n$ (this is, in fact, the easiest estimator for $p$ in this case, but it doesn't generalize well).
+
+```{r, cache=TRUE}
+## check estimate
+mean(crowded)
+out$par*5
+```
+
+Another way to estimate $p$ is using a Bayesian approach that goes back to Laplace's Law of Succession. A conjugate model for a binomial probability is a beta distribution. 
+
+$$ E(\theta|y) = \frac{\alpha + y}{\alpha + \beta + n} $$
+where $y$ is the number of successes out of $n$ trials and $\alpha$ and $\beta$ are prior successes and failures respectively.
+
+# Beta(y+1,n-y+1)
+
+```{r, cache=TRUE}
+n <- 5*length(crowded)
+alpha <- 1
+beta <- 1
+phat <- (y+1)/(alpha+beta+n)
+x <- seq(0,1,length=1000)
+pd <- dbeta(x,y+1,n-y+1)
+## 90% credible interval
+cri <- qbeta(c(0.05,0.95),y+1,n-y+1)
+xhi <- x[x >=cri[2]]
+xhi <- c(xhi[1], xhi)
+pdhi <- pd[x >= cri[2]]
+pdhi <- c(0,pdhi)
+# low
+xlo <- x[x <=cri[1]]
+xlo <- c(xlo,xlo[length(xlo)])
+pdlo <- pd[x <=cri[1]]
+pdlo <- c(pdlo,0)
+## plots
+plot(x, pd, type="l", lwd=2,xlab="p", ylab="Probability Density", xlim=c(0.27,0.39))
+abline(h=0)
+polygon(xhi, pdhi, col="grey")
+polygon(xlo, pdlo, col="grey")
+segments(phat,0,phat,31,col="red")
+```
+Or, if you prefer a simulation-based measure:
+
+```{r, cache=TRUE}
+some.sims <- rbeta(1000,y+1,n-y+1)
+hist(some.sims,20,freq=FALSE,col=grey(0.65),xlab="p",ylab="Probability Density", xlim=c(0.27,0.39), main="")
+```
+
+
+
+
+
+## Gillespie Method
+
+First, specific the dynamics.
+```{r, cache=TRUE}
+iterate <- function(old, param1){
+  Change <- matrix( c(-1,1,0,
+                      0,-1,1,
+                      1,0,0,
+                      -1,0,0,
+                      0,-1,0,
+                      0,0,-1), nr=6, nc=3, byrow=TRUE)
+  ## specify parameters
+  beta <- param1[1] # effective contact rate
+  nu <- param1[2]  # recovery rate
+  mu <- param1[3]  # mortality rate
+  ## specify compartments
+  S <- old[1]
+  I <- old[2]
+  R <- old[3]
+  N <- S+I+R
+  
+  Rate <- rep(0,6)
+  Rate[1] <- beta*S*I/N
+  Rate[2] <- nu*I
+  Rate[3] <- mu*N
+  Rate[4] <- mu*S
+  Rate[5] <- mu*I
+  Rate[6] <- mu*R
+
+  U <- runif(2)
+  step <- -log(U[2])/sum(Rate)
+  m <- min(which(cumsum(Rate)>=U[1]*sum(Rate)))
+  new.value <- old + Change[m,]
+  out <- list(step=step, new=new.value)
+  out
+}
+```
+
+Then iterate the model.
+```{r, cache=TRUE}
+stoch.iter <- function(TimeMax,Initial,Parameters){
+  ## specify compartments
+  S <- Initial[1]
+  I <- Initial[2]
+  R <- Initial[3]
+  ## set up parameters
+  beta <- Parameters[1]
+  nu <- Parameters[2]
+  mu <- Parameters[3]
+  N0 <- Parameters[4]
+  param <- c(beta,nu,mu,N0)
+
+  Times <- 0
+  P <- c(S,I,R)
+  old <- P
+  ## simulate
+  loop <- 1
+  while(Times[loop]<TimeMax){
+    tmp <- iterate(old=old,param1=param) # tmp = (step,new)
+    loop <- loop+1
+    Times <- c(Times,Times[(loop-1)]+tmp$step)
+    P <- rbind(P,as.vector(old))
+    loop <- loop+1
+    Times <- c(Times,Times[(loop-1)])
+    P <- rbind(P,as.vector(tmp$new))
+    old <- tmp$new
+  }
+
+  Times <- Times[1:loop]
+  P <- P[1:loop,]
+
+  out <- list(t=Times,pop=P)
+  out
+}
+```
+
+Plot the outcome of a single run.
+```{r, cache=TRUE}
+set.seed(8675309)
+aaa <- stoch.iter(TimeMax=2*365, Initial=c(50,2,0), Parameters=c(1/2,1/5,5e-4,50))
+
+times <- aaa$t
+popstates <- as.data.frame(aaa$pop)
+popstates <- data.frame(t=times,popstates, row.names=NULL)
+names(popstates) <- c("t","S","I","R")
+
+plot(popstates$t,popstates$S, type="S", col="black", lwd=3, xlab="Time (days)", ylab="Population Size", ylim=c(0,60))
+lines(popstates$t,popstates$I, type="S", col="red", lwd=3)
+lines(popstates$t,popstates$R, type="S", col="magenta", lwd=3)
+legend("topright", c("S","I","R"), col=c("black","red","magenta"), lwd=3)
+
+## dynamics pretty fast; truncate to visualize epidemic curve more clearly
+trunc <- min(which(popstates$I==0))
+plot(popstates$t[1:trunc],popstates$I[1:trunc], type="S", col="black", lwd=3, xlab="Time (days)", ylab="Number Infected")
+
+```

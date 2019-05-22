@@ -1,0 +1,71 @@
+---
+title: "Ecology"
+author: "James Holland Jones"
+date: "05/12/2019"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Some Definitions
+
+** Competition **
+
+** Apparent Competition **
+
+** Competitive Release **
+
+** Predation **
+
+** Metapopulation **
+
+** Succession **
+
+## Lotka-Volterra
+
+## MacArthur-Wilson Model of Island Biogeography
+
+```{r, cache=TRUE, echo=FALSE, message=FALSE}
+n <- seq(0,20,length=500)
+near <- 100
+far <- 70
+large <- 1
+small <- 2
+rate1 <- 0.1
+rate2 <- 0.2
+# equilibria
+LN <- log(near/large)/(rate2+rate1)
+LF <- log(far/large)/(rate2+rate1)
+SN <- log(near/small)/(rate2+rate1)
+SF <- log(far/small)/(rate2+rate1)
+```
+
+We will highlight the equilibrium point with the highest species richness (a large island near a colonizing source).
+
+```{r, cache=TRUE, echo=FALSE, message=FALSE}
+plot(n, near*exp(-rate1*n), type="l", lwd=3, col="red",
+     xlab="Number of Species", 
+     ylab="Rate",
+     ylim=c(0,110),
+     xlim=c(-3,23),
+     yaxs="i",
+     axes=FALSE)
+lines(n, far*exp(-rate1*n), lwd=3, col="red")
+lines(n, small*exp(rate2*n), lwd=3, col="green")
+lines(n, large*exp(rate2*n), lwd=3, col="green")
+text(22, 108, "small", cex=0.75)
+text(22, 55, "large", cex=0.75)
+text(-1.5,100, "near", cex=0.75)
+text(-1.5,70, "far", cex=0.75)
+segments(LN,0,LN, near*exp(-rate1*LN), lty=2)
+#segments(LF,0,LF, far*exp(-rate1*LF), lty=2)
+#segments(SN,0,SN, near*exp(-rate1*SN), lty=2)
+#segments(SF,0,SF, far*exp(-rate1*SF), lty=2)
+axis(1,at=LN, labels="LN", axis.cef=0.75)
+box()
+```

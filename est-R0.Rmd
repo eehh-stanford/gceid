@@ -1,0 +1,112 @@
+---
+title: "Calculating $R_0$ From Reporting Data"
+author: "James Holland Jones"
+date: "12/2/2017"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Ebola Virus Disease in West Africa, 2014-2015
+
+EVD was the model disease for the terrible (1995) Dustin Hoffman movie [Outbreak](http://www.imdb.com/title/tt0114069/). As we learned in the much more scientifically-accurate (2011) movie [Contagion](http://www.imdb.com/title/tt1598778/) (which is based on an equally terrifying aerosolized [Nipah](http://www.cdc.gov/vhf/nipah/), one of the key pieces of information regarding an epidemic is the [basic reproduction number](http://web.stanford.edu/~jhj1/teachingdocs/Jones-on-R0.pdf), $R_0$. The basic reproduction number tells us how many secondary infections are expected (i.e., on average) to be produced by a single, typical case at the outset of an epidemic before the pool of susceptible people has been depleted. $R_0$ provides lots of information about epidemics, including: 
+
+1. The epidemic threshold (i.e., whether or not an epidemic will occur, which happens in the deterministic case when $R_0 > 1$).
+2. The initial rate of increase of an epidemic.
+3. The critical vaccination threshold (i.e., what fraction of the population you need to vaccinate to prevent an outbreak). 
+4. The endemic equilibrium of an infection (i.e., the fraction of the population that is infected in between outbreaks)
+5. The final size of the epidemic (i.e., the fraction of the total population that is ever infected when the epidemic is over).
+
+Thus, for a novel outbreak, it's good to have an idea of $R_0$. 
+
+## Estimating $R_0$ From the Early Growth Rate of an Epidemic
+
+A classic result from demography notes that the net reproduction ratio, $R_0$, is defined as:
+
+\[
+R_0 = e^{rT}
+\]
+
+where $r$ is the intrinsic rate of increase of the population and $T$ is the generation time (the mean age of child-bearing). The net reproduction ratio is the sum of the product of age-specific surviorship and fertility and gives the ratio of the size of two successive generations. 
+
+In the context of an epidemic, we can use this result as a crude way to estimate the basic reproduction number, also $R_0$, of the epidemic. Like the net reproduction ratio in demography, the basic reproduction number is the ratio of the size of two successive generations. While this generation is the mean age of child-bearing in demography, it is something more like the average of the sum of the incubation and infectious period, known as the *serial interval* in an epidemic. Call the serial interval $V$ and let the early, exponential growth rate of an epidemic be $r$ and $R=e^r$. An estimator of $R_0$ is then $R_0 = RV$.
+
+### Lipsitch et al. (2003): Estimating $R_0$ for SARS
+
+In their (2003) [paper](http://dx.doi.org/10.1126/science.1086616) on the outbreak, Lipsitch and colleagues provided a method for estimating the reproduction number from outbreak data that extends the standard approaches somewhat. Note that this is a more generalized reproduction number, which we call $R$, than is the basic reproduction number, $R_0$. The key difference is that a reproduction number can be calculated at any point in an outbreak, whereas $R_0$ is only technically correct at the outset (the zero index in $R_0$ indicates the "generation" of the outbreak where "0" refers to the index case, a.k.a., "patient zero"). 
+
+The method involves equating $R_0$ for a linearized SEIR system to the observed rate of increase of the outbreak at some point in time $t$, using the fact that the reproduction number is approximately equivalent to the growth rate of the epidemic. See the [supplementary information](http://science.sciencemag.org/content/sci/suppl/2003/06/19/1086616.DC1/Lipsitch.SOM.rev1.pdf) from Lipsitch et al. (2003) for details of the method. 
+
+In brief, we calculate the dominant eigenvalue of the linearized SEIR model, for which it is straightforward to write an analytical formula, and equate this to $\log[Y(t)]/t$, the empirical growth rate of the epidemic (where $Y(t)$ is the cumulative number of cases at time $t$). 
+
+
+Lipsitch et al. (2003) write the linearized system as 
+
+\[
+\left[ \begin{array}{c}
+	\dot{E} \\
+	\dot{I}
+   \end{array} \right] = \left[ \begin{array}{cc}
+	-1/L  & R/D  \\
+	1/L & -1/D
+   \end{array} \right] \left[ \begin{array}{c}
+	E \\
+	I
+\end{array} \right]
+\]
+
+$L$ is the length of the incubation period (therefore $1/L$ is the rate of removal from $E$) and $D$ is the duration of infectiousness (therefore $1/D$ is the rate of removal from $I$). The serial interval -- which is the only thing observable at the outset of an epidemic -- is $V = D + L$. Lipsitch and colleagues define $f$ as the ratio of the infectious period to the serial interval, such that $D=fV$.
+
+Note that there is an error in the online appendix. There is a missing negative sign on the movement of individuals out of the infectious class (i.e., the $-1/D$ in the the $(2,2)$-element of the linearized matrix). 
+
+Substitute $fV$ for $D$ and $V - fV$ for $L$ (i.e., remove the bits that are unobservable). The larger eigenvalue of the linearized SEIR model is:
+
+\[
+\lambda = \frac{-1 + \sqrt{(1 - 2 f)^2 + 4R f(1 - f)}}{2V f(1 - f)}
+\]
+
+Rearranging, we get the equation we use to estimate the reproduction number:
+
+\[ R = 1 + V \lambda + f(1-f) (V \lambda)^2, \]
+
+Note that $f$ enters the equation above as the product $f(1-f)$. Its effect is therefore symmetrical such that, for instance $f=0.3$ and $f=0.7$ affect $R$ in exactly the same way. 
+
+There are a variety of online sources for data. Wikipedia has actually curated the WHO data for the whole 2014-2015 West African EVD epidemic in a very convenient way [here](https://en.wikipedia.org/wiki/West_African_Ebola_virus_epidemic_timeline_of_reported_cases_and_deaths).
+
+The index case for the epidemic was inferred to be a 2-year-old boy from Meliandou village in Guinea who contracted the illness on 02 December 2013 and died four days later [(Baize et al. 2014)](http://dx.doi.org/10.1056/NEJMoa1404505). 
+
+For the serial interval data, we can use the values provided by the [Legrand et al. (2007)](http://dx.doi.org/10.1017/S0950268806007217) of $L=7$ and $D=10$ (so $V=17$). Note that at the time of an outbreak, we won't know this and will need to estimate it as best we can. Work by the [WHO Ebola Response Team](http://www.nejm.org/doi/10.1056/NEJMoa1411100) showed that the serial interval for the 2014-2015 West African epidemic was very similar to previous epidemics ($L=11.5$ and $V=15.3$ days).
+
+
+```{r, cache=TRUE}
+## From Lipsitch et al. (2003)
+## lambda is the dominant eigenvalue of the linearized SEIR model
+## V is the serial interval V = D + L
+## D  is duration infectious period, L is duration of latent period
+## f is the ratio of the the infectious period to the serial interval
+## to solve for R set the eigenvalue equal to the observed exponential growth rate of the epidemic log(Y(t))/t
+Rapprox <- function(lambda,V,f) 1 + V*lambda + f*(1-f)*(V* lambda)^2
+## data file actually tab-delimited
+ebola <- read.table("https://web.stanford.edu/class/earthsys214/data/west-africa-cases1.txt",
+                    header=TRUE, skip=1,colClasses=c("character",rep("numeric",10)))
+n <- dim(ebola)[1]
+# s = start of epidemic, i.e., date of index case
+s <- as.Date("02-12-2013", "%d-%m-%Y")
+dates <- as.Date(ebola$Date, "%d-%m-%Y")
+d <- as.numeric(dates-s)
+totals <- ebola$TCases
+deaths <- ebola$TDeaths
+Rm <- rep(0,n)
+for(i in 1:n) Rm[i] <- Rapprox(log(totals[i])/d[i],17,10/17)
+
+## plot estimated R values vs. date as "hist-like" plot
+plot(rev(dates), rev(Rm),type="h", lwd=3, col="#E82F13",xlab="Reporting Date", 
+     ylab=expression(R[0]), ylim=c(1,1.85))
+abline(h=1, col=grey(0.85), lwd=3)
+```
+
+To test for the sensitivity of our estimate of $R$ on the assumptions about latent period, we can plot the values of $R$ against the $L$...
