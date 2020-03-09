@@ -1,37 +1,17 @@
-## Welcome to GitHub Pages
+## Global Change and Emerging Infectious Disease
 
-You can use the [editor on GitHub](https://github.com/eehh-stanford/gceid/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+This repository contains the notes and related information for my graduate section for the class, Global Change and Emerging Infectious Disease (Earth Systems 214).
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+The notes for the class include (links to come)
 
-### Markdown
+- Introduction to `R`
+- Some Notes on *R*<sub>*0*</sub>
+- Sensitivities of *R*<sub>*0*</sub>
+- Notes on Basic Epidemiological Measures of Association
+- Estimating *R*<sub>*0*</sub> from Case Data
+- Numerical Integration of ODE Models
+- Epidemiological Data and Stats in `R`
+- Notes on Time Series and Spectral Analysis
+- Fitting Epidemic Models to Data (Part I)
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/eehh-stanford/gceid/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
