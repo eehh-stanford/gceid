@@ -15,3 +15,8 @@ The notes for the class include (links to come)
 - Fitting Epidemic Models to Data (Part I)
 
 
+## Scratchpad
+
+In addition to the notes, I will occasionally push notes of timely relevance for the subject infectious disease ecology here.
+
+- Uniform sampling of graphs with heterogeneous degree distribution 
