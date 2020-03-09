@@ -4,7 +4,7 @@ with values ranging from around
 in [excess of
 6](https://www.medrxiv.org/content/10.1101/2020.02.07.20021154v1). Given
 such robust values of the reproduction number, we should expect
-substantial secondary spread beyong the initial epidemic focus in Wuhan.
+substantial secondary spread beyond the initial epidemic focus in Wuhan.
 However, it has not spread beyond China (and indeed Wuhan) to the extent
 that we might expect, given this high reproduction ratio. Kyra Grantz,
 Jess Metcalf, and Justin Lessler [recently
