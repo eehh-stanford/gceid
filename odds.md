@@ -63,7 +63,7 @@ between the absolute risk of exposed and unexposed individuals:
 \[ RD = \frac{a}{a+b} - \frac{c}{c+d} 
 \]
 -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=\large&space;RD&space;=&space;\frac{a}{a&plus;b}&space;-&space;\frac{c}{c&plus;d}" target="_blank"><img src="https://latex.codecogs.com/svg.latex?\large&space;RD&space;=&space;\frac{a}{a&plus;b}&space;-&space;\frac{c}{c&plus;d}" title="\large RD = \frac{a}{a+b} - \frac{c}{c+d}" /></a>
+<img src="https://latex.codecogs.com/svg.latex?\large&space;RD&space;=&space;\frac{a}{a&plus;b}&space;-&space;\frac{c}{c&plus;d}" title="\large RD = \frac{a}{a+b} - \frac{c}{c+d}" />
 
 In a cohort design, the risk difference is typically known as the
 *attributable risk*.
@@ -84,7 +84,8 @@ Risk Ratios and Odds Ratios
 The *risk ratio* or *relative risk* is the ratio of the risk to those
 exposed relative to the risk of those not exposed:
 
-$$ \\widehat{RR} = \\frac{a/(a+b)}{c/(c+d)}$$ $$
+<!--\[ \widehat{RR} = \frac{a/(a+b)}{c/(c+d)} \]-->
+<img src="https://latex.codecogs.com/svg.latex?\large&space;\widehat{RR}&space;=&space;\frac{a/(a&plus;b)}{c/(c&plus;d)}" title="\large \widehat{RR} = \frac{a/(a+b)}{c/(c+d)}" />
 
 If the entries of our table are large enough a normal approximation for
 the binomial distribution applies and we can use normal theory to
@@ -93,10 +94,11 @@ $\\widehat{RR}$. It turns out that $\\log \\widehat{RR}$ has a sampling
 distribution better approximated by a normal, so we work with that. The
 standard error of $\\log \\widehat{RR}$ is
 
-$$ 
-\\mathrm{se}\[\\log \\widehat{RR}\] \\approx \\sqrt{\\frac{b}{an\_1} +
-  \\frac{d}{cn\_2}}, 
-$$
+<!--\[ 
+\mathrm{se}[\log \widehat{RR}] \approx \sqrt{\frac{b}{an_1} +
+  \frac{d}{cn_2}}, 
+\] -->
+<img src="https://latex.codecogs.com/svg.latex?\large&space;\mathrm{se}[\log&space;\widehat{RR}]&space;\approx&space;\sqrt{\frac{b}{an_1}&space;&plus;&space;\frac{d}{cn_2}}" title="\large \mathrm{se}[\log \widehat{RR}] \approx \sqrt{\frac{b}{an_1} + \frac{d}{cn_2}}" />
 
 where *n*<sub>1</sub> = *a* + *b* and *n*<sub>2</sub> = *c* + *d* are
 the row sums.
@@ -105,15 +107,18 @@ Using the standard approach for calculating confidence intervals from
 the normal approximation, the 95% confidence interval on the relative
 risk are calculated from:
 
-$$ 
-c\_1 = \\log \\widehat{RR} - 1.96 \\sqrt{\\frac{b}{an\_1} +
-  \\frac{d}{cn\_2}}
-$$
+<!--\[ 
+c_1 = \log \widehat{RR} - 1.96 \sqrt{\frac{b}{an_1} +
+  \frac{d}{cn_2}}
+\]
 
-$$ 
-c\_2 = \\log \\widehat{RR} + 1.96 \\sqrt{\\frac{b}{an\_1} +
-  \\frac{d}{cn\_2}}
-$$
+\[ 
+c_2 = \log \widehat{RR} + 1.96 \sqrt{\frac{b}{an_1} +
+  \frac{d}{cn_2}}
+\]-->
+<img src="https://latex.codecogs.com/svg.latex?\large&space;c_1&space;=&space;\log&space;\widehat{RR}&space;-&space;1.96&space;\sqrt{\frac{b}{an_1}&space;&plus;&space;\frac{d}{cn_2}}" title="\large c_1 = \log \widehat{RR} - 1.96 \sqrt{\frac{b}{an_1} + \frac{d}{cn_2}}" />
+
+<img src="https://latex.codecogs.com/svg.latex?\large&space;c_2&space;=&space;\log&space;\widehat{RR}&space;&plus;&space;1.96&space;\sqrt{\frac{b}{an_1}&space;&plus;&space;\frac{d}{cn_2}}" title="\large c_2 = \log \widehat{RR} + 1.96 \sqrt{\frac{b}{an_1} + \frac{d}{cn_2}}" />
 
 And the CI is thus,
 \[*e*<sup>*c*<sub>1</sub></sup>, *e*<sup>*c*<sub>2</sub></sup>\]. Just
@@ -144,31 +149,38 @@ can get around this by using an odds ratio.
 The *odds ratio* is the ratio of odds of exposure among cases to those
 among controls:
 
-$$ OR = \\frac{a/c}{b/d} = \\frac{ad}{bc}$$
- It is the cross-product of the cells of our epidemiological table. For
+<!--\[ OR = \frac{a/c}{b/d} = \frac{ad}{bc} \] -->
+<img src="https://latex.codecogs.com/svg.latex?\large&space;OR&space;=&space;\frac{a/c}{b/d}&space;=&space;\frac{ad}{bc}" title="\large OR = \frac{a/c}{b/d} = \frac{ad}{bc}" />
+
+It is the cross-product of the cells of our epidemiological table. For
 rare diseases, the OR is a very good approximation of the RR. This is
 because, if the disease is rare, *a* ≪ *b* and *c* ≪ *d*. This means:
 
-$$ \\frac{a/(a+b)}{c/(c+d)} \\approx \\frac{a/b}{c/d} = \\frac{ad}{bc}.$$
+<!--\[ \frac{a/(a+b)}{c/(c+d)} \approx \frac{a/b}{c/d} = \frac{ad}{bc}.\]-->
+<img src="https://latex.codecogs.com/svg.latex?\large&space;\frac{a/(a&plus;b)}{c/(c&plus;d)}&space;\approx&space;\frac{a/b}{c/d}&space;=&space;\frac{ad}{bc}" title="\large \frac{a/(a+b)}{c/(c+d)} \approx \frac{a/b}{c/d} = \frac{ad}{bc}" />
 
 We can calculate confidence intervals on an odds ratio using the normal
 approximation (assuming the cells are large enough). Again, we work with
 the logarithm of the measure of association. The standard error of the
 logarithm of the odds ratio is,
 
-$$ \\mathrm{se}\[\\log OR\] = \\sqrt{\\frac{1}{a} + \\frac{1}{b} +
-  \\frac{1}{c} + \\frac{1}{d}}, 
-$$
+<!--\[ \mathrm{se}[\log OR] = \sqrt{\frac{1}{a} + \frac{1}{b} +
+  \frac{1}{c} + \frac{1}{d}}, 
+\]-->
+<img src="https://latex.codecogs.com/svg.latex?\large&space;\mathrm{se}[\log&space;OR]&space;=&space;\sqrt{\frac{1}{a}&space;&plus;&space;\frac{1}{b}&space;&plus;&space;\frac{1}{c}&space;&plus;&space;\frac{1}{d}}" title="\large \mathrm{se}[\log OR] = \sqrt{\frac{1}{a} + \frac{1}{b} + \frac{1}{c} + \frac{1}{d}}" />
 
 and the 95% confidence intervals for the log-odds ratio are thus:
 
-$$ c\_1 = \\log OR - 1.96 \\sqrt{\\frac{1}{a} + \\frac{1}{b} +
-  \\frac{1}{c} + \\frac{1}{d}} 
-$$
+<!--\[ c_1 = \log OR - 1.96 \sqrt{\frac{1}{a} + \frac{1}{b} +
+  \frac{1}{c} + \frac{1}{d}} 
+\]
 
-$$ c\_2 = \\log OR + 1.96 \\sqrt{\\frac{1}{a} + \\frac{1}{b} +
-  \\frac{1}{c} + \\frac{1}{d}} 
-$$
+\[ c_2 = \log OR + 1.96 \sqrt{\frac{1}{a} + \frac{1}{b} +
+  \frac{1}{c} + \frac{1}{d}} 
+\]-->
+<img src="https://latex.codecogs.com/svg.latex?\large&space;c_1&space;=&space;\log&space;OR&space;-&space;1.96&space;\sqrt{\frac{1}{a}&space;&plus;&space;\frac{1}{b}&space;&plus;&space;\frac{1}{c}&space;&plus;&space;\frac{1}{d}}" title="\large c_1 = \log OR - 1.96 \sqrt{\frac{1}{a} + \frac{1}{b} + \frac{1}{c} + \frac{1}{d}}" />
+
+<img src="https://latex.codecogs.com/svg.latex?\large&space;c_2&space;=&space;\log&space;OR&space;&plus;&space;1.96&space;\sqrt{\frac{1}{a}&space;&plus;&space;\frac{1}{b}&space;&plus;&space;\frac{1}{c}&space;&plus;&space;\frac{1}{d}}" title="\large c_2 = \log OR + 1.96 \sqrt{\frac{1}{a} + \frac{1}{b} + \frac{1}{c} + \frac{1}{d}}" />
 
 Back-transforming, we get the confidence interval on the unit scale of
 \[*e*<sup>*c*<sub>1</sub></sup>, *e*<sup>*c*<sub>2</sub></sup>\].
