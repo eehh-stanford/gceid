@@ -1,11 +1,10 @@
 ---
 title: "Odds Ratios"
 author: "James Holland Jones"
-date: "03/02/2018"
+date: "03/09/2020"
 output:
-  html_document:
-    toc: true
-    toc_depth: 2
+  md_document:
+  variant: markdown_github
 ---
 
 ```{r setup, include=FALSE}
@@ -17,17 +16,14 @@ knitr::opts_chunk$set(echo = TRUE)
 Consider a standard epidemiological table that cross-classifies members of a study population by their disease and exposure status. The columns of the two-way table are the disease state ("disease", "no disease") and the rows are the exposure state ("exposed","not exposed").
 
 ```{r cache=TRUE}
-library(hwriter)
+library(knitr)
 epitab <- matrix(c("a", "b",
                 "c", "d"), nr=2, nc=2, byrow=TRUE)
 colnames(epitab) <- c("Disease","No Disease")
 rownames(epitab) <- c("Exposed", "Not Exposed")
-epitab
+kable(epitab, align="c")
 ```
 
-```{r hwrite, results = 'asis'}
-cat(hwrite(epitab, border = 1, center=TRUE, width='300px', br=TRUE, table.style=list('padding: 50px'),  col.style=list('text-align:center'), row.names=TRUE))
-```
 
 The values in the cells of this table are counts. For example, `a` is the count of disease cases who experienced exposure. The row and column sums are known collectively as the *marginal totals* of the table: `a+b` and `c+d` are the row sums and `a+c` and `b+d` are the column sums. The grand sum is `n=a+b+c+d`.
 
@@ -49,18 +45,24 @@ The *risk ratio* or *relative risk* is the ratio of the risk to those exposed re
 $$\widehat{RR} = \frac{a/(a+b)}{c/(c+d)}$$
 If the entries of our table are large enough a normal approximation for the binomial distribution applies and we can  use normal theory to calculate standard errors and place confidence bounds around $\widehat{RR}$. It turns out that  $\log \widehat{RR}$ has a sampling distribution better approximated by a normal, so we work with that. The standard error of $\log \widehat{RR}$ is
 
-\[ \mathrm{se}[\log \widehat{RR}] \approx \sqrt{\frac{b}{an_1} +
-  \frac{d}{cn_2}}, \] 
+\[ 
+\mathrm{se}[\log \widehat{RR}] \approx \sqrt{\frac{b}{an_1} +
+  \frac{d}{cn_2}}, 
+\] 
 
 where $n_1=a+b$ and $n_2 = c+d$ are the row sums.
 
 Using the standard approach for calculating confidence intervals from the normal approximation, the 95% confidence interval on the relative risk are calculated from:
 
-\[ c_1 = \log \widehat{RR} - 1.96 \sqrt{\frac{b}{an_1} +
-  \frac{d}{cn_2}}\]
+\[ 
+c_1 = \log \widehat{RR} - 1.96 \sqrt{\frac{b}{an_1} +
+  \frac{d}{cn_2}}
+\]
 
-\[ c_2 = \log \widehat{RR} + 1.96 \sqrt{\frac{b}{an_1} +
-  \frac{d}{cn_2}}\]
+\[ 
+c_2 = \log \widehat{RR} + 1.96 \sqrt{\frac{b}{an_1} +
+  \frac{d}{cn_2}}
+\]
 
 And the CI is thus, $[e^{c_1}, e^{c_2}]$. Just as a reminder, we multiply by 1.96 when calculating a 95% confidence interval using a normal approximation because 95% of the probability mass of a normal distribution lies within 1.96 standard deviations of the mean.
 
@@ -80,15 +82,18 @@ $$ \frac{a/(a+b)}{c/(c+d)} \approx \frac{a/b}{c/d} = \frac{ad}{bc}.$$
 We can calculate confidence intervals on an odds ratio using the normal approximation (assuming the cells are large enough). Again, we work with the logarithm of the measure of association. The standard error of the logarithm of the odds ratio is,
 
 \[ \mathrm{se}[\log OR] = \sqrt{\frac{1}{a} + \frac{1}{b} +
-  \frac{1}{c} + \frac{1}{d}}, \]
+  \frac{1}{c} + \frac{1}{d}}, 
+\]
 
 and the 95% confidence intervals for the log-odds ratio are thus:
 
 \[ c_1 = \log OR - 1.96 \sqrt{\frac{1}{a} + \frac{1}{b} +
-  \frac{1}{c} + \frac{1}{d}} \]
+  \frac{1}{c} + \frac{1}{d}} 
+\]
 
 \[ c_2 = \log OR + 1.96 \sqrt{\frac{1}{a} + \frac{1}{b} +
-  \frac{1}{c} + \frac{1}{d}} \]
+  \frac{1}{c} + \frac{1}{d}} 
+\]
 
 
 Back-transforming, we get the confidence interval on the unit scale of $[e^{c_1}, e^{c_2}]$.
@@ -101,19 +106,13 @@ As China increased its cooperation with WHO and other health organizations, the 
 Sampling effort thus turned to the exotic animal markets of Guangdong. A team from the University of Hong Kong and the Guangdong CDC sampled animals from a market in Shenzhen. A total of seven common game animals to the market were subjected to  both nasal and fecal sampling. Virus was repeatedly detected in palm civets. These researchers also took nasal samples from the animal traders, in addition to hospital workers, Guandong CDC employees, and health visitors to a clinic as a controls. A total of 70 people in the market were SCoV+, 66 of which were animal traders. 579 were SCoV-, of which 442 were animal traders ([Yu et al. 2003](https://www.cdc.gov/mmwr/preview/mmwrhtml/mm5241a2.htm)).
 
 ```{r, cache=TRUE}
-require(hwriter)
 cc <- matrix(c(66L, 442L,
                 4L, 133L), nr=2, nc=2, byrow=TRUE)
 colnames(cc) <- c("SCoV+","SCoV-")
 rownames(cc) <- c("Animal Trader", "Hospital Worker")
 cc
+kable(cc, align="c")
 ```
-
-```{r,results = 'asis'}
-cat(hwrite(cc, border = 1, center=TRUE, width='300px', br=TRUE, table.style=list('padding: 50px'),  col.style=list('text-align:center'), row.names=TRUE))
-```
-<!-- must use results = 'asis' or no table will be produced! -->
-
 Calculate the odds ratio and confidence intervals. 
 
 ```{r,cache=TRUE}
