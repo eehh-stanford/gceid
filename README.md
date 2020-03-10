@@ -7,7 +7,7 @@ The notes for the class include (links to come)
 - Introduction to `R`
 - [Some Notes on *R*<sub>*0*</sub>](Jones-R0-notes2019.pdf)
 - Sensitivities of *R*<sub>*0*</sub>
-- Notes on Basic Epidemiological Measures of Association
+- [Notes on Basic Epidemiological Measures of Association](odds.md)
 - Estimating *R*<sub>*0*</sub> from Case Data
 - Numerical Integration of ODE Models
 - Epidemiological Data and Stats in `R`
