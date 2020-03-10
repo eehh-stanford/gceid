@@ -33,7 +33,13 @@ There are two broad ways that we could construct an epidemiological table like t
 
 The *prevalence* is simply the number of cases divided by the total population: $(a+c)/(a+b+c+d)$. The *absolute risk* or *attack rate* is $a/(a+b)$. The Risk difference is the difference between the absolute risk of exposed and unexposed individuals:
 
-$$ RD = \frac{a}{a+b} - \frac{c}{c+d} $$
+<!--
+\[ RD = \frac{a}{a+b} - \frac{c}{c+d} 
+\]
+-->
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\large&space;RD&space;=&space;\frac{a}{a&plus;b}&space;-&space;\frac{c}{c&plus;d}" target="_blank"><img src="https://latex.codecogs.com/svg.latex?\large&space;RD&space;=&space;\frac{a}{a&plus;b}&space;-&space;\frac{c}{c&plus;d}" title="\large RD = \frac{a}{a+b} - \frac{c}{c+d}" /></a>
+
 In a cohort design, the risk difference is typically known as the *attributable risk*.
 
 Something not easily captured in our simple $2 \times 2$ table is *incidence*, which is the number of new cases in some time interval divided by the person-time units. For example, if there are 3 new cases in a week in a population with 100 people at risk, then the incidence is $3/100$. Suppose that each case is fatal and that the average number of person-weeks lived by those who contract the disease is 0.5 weeks. In this case, the incidence would be slightly higher at $3/98.5$ (i.e., 97 person-weeks for those not afflicted and a total of $3 \times 0.5 = 1.5$ person-weeks for those dying).
@@ -42,7 +48,8 @@ Something not easily captured in our simple $2 \times 2$ table is *incidence*, w
 
 The *risk ratio* or *relative risk* is the ratio of the risk to those exposed relative to the risk of those not exposed:
 
-$$\widehat{RR} = \frac{a/(a+b)}{c/(c+d)}$$
+\[ \widehat{RR} = \frac{a/(a+b)}{c/(c+d)}$$ \]
+
 If the entries of our table are large enough a normal approximation for the binomial distribution applies and we can  use normal theory to calculate standard errors and place confidence bounds around $\widehat{RR}$. It turns out that  $\log \widehat{RR}$ has a sampling distribution better approximated by a normal, so we work with that. The standard error of $\log \widehat{RR}$ is
 
 \[ 
@@ -78,7 +85,8 @@ The *odds ratio* is the ratio of odds of exposure among cases to those among con
 $$ OR = \frac{a/c}{b/d} = \frac{ad}{bc}$$
 It is the cross-product of the cells of our epidemiological table. For rare diseases, the OR is a very good approximation of the RR. This is because, if the disease is rare, $a \ll b$ and $c \ll d$. This means:
 
-$$ \frac{a/(a+b)}{c/(c+d)} \approx \frac{a/b}{c/d} = \frac{ad}{bc}.$$
+\[ \frac{a/(a+b)}{c/(c+d)} \approx \frac{a/b}{c/d} = \frac{ad}{bc}.\]
+
 We can calculate confidence intervals on an odds ratio using the normal approximation (assuming the cells are large enough). Again, we work with the logarithm of the measure of association. The standard error of the logarithm of the odds ratio is,
 
 \[ \mathrm{se}[\log OR] = \sqrt{\frac{1}{a} + \frac{1}{b} +

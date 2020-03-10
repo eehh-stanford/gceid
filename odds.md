@@ -59,8 +59,13 @@ population: (*a* + *c*)/(*a* + *b* + *c* + *d*). The *absolute r
 *attack rate* is *a*/(*a* + *b*). The Risk difference is the difference
 between the absolute risk of exposed and unexposed individuals:
 
-$$ RD = \\frac{a}{a+b} - \\frac{c}{c+d} $$
- In a cohort design, the risk difference is typically known as the
+<!--
+\[ RD = \frac{a}{a+b} - \frac{c}{c+d} 
+\]
+-->
+<a href="https://www.codecogs.com/eqnedit.php?latex=\large&space;RD&space;=&space;\frac{a}{a&plus;b}&space;-&space;\frac{c}{c&plus;d}" target="_blank"><img src="https://latex.codecogs.com/svg.latex?\large&space;RD&space;=&space;\frac{a}{a&plus;b}&space;-&space;\frac{c}{c&plus;d}" title="\large RD = \frac{a}{a+b} - \frac{c}{c+d}" /></a>
+
+In a cohort design, the risk difference is typically known as the
 *attributable risk*.
 
 Something not easily captured in our simple 2 × 2 table is *incidence*,
@@ -79,8 +84,9 @@ Risk Ratios and Odds Ratios
 The *risk ratio* or *relative risk* is the ratio of the risk to those
 exposed relative to the risk of those not exposed:
 
-$$\\widehat{RR} = \\frac{a/(a+b)}{c/(c+d)}$$
- If the entries of our table are large enough a normal approximation for
+$$ \\widehat{RR} = \\frac{a/(a+b)}{c/(c+d)}$$ $$
+
+If the entries of our table are large enough a normal approximation for
 the binomial distribution applies and we can use normal theory to
 calculate standard errors and place confidence bounds around
 $\\widehat{RR}$. It turns out that $\\log \\widehat{RR}$ has a sampling
@@ -144,7 +150,8 @@ rare diseases, the OR is a very good approximation of the RR. This is
 because, if the disease is rare, *a* ≪ *b* and *c* ≪ *d*. This means:
 
 $$ \\frac{a/(a+b)}{c/(c+d)} \\approx \\frac{a/b}{c/d} = \\frac{ad}{bc}.$$
- We can calculate confidence intervals on an odds ratio using the normal
+
+We can calculate confidence intervals on an odds ratio using the normal
 approximation (assuming the cells are large enough). Again, we work with
 the logarithm of the measure of association. The standard error of the
 logarithm of the odds ratio is,
