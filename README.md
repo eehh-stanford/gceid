@@ -5,7 +5,7 @@ This repository contains the notes and related information for my graduate secti
 The notes for the class include (links to come)
 
 - Introduction to `R`
-- Some Notes on *R*<sub>*0*</sub>
+- [Some Notes on *R*<sub>*0*</sub>](Jones-R0-notes2019.pdf)
 - Sensitivities of *R*<sub>*0*</sub>
 - Notes on Basic Epidemiological Measures of Association
 - Estimating *R*<sub>*0*</sub> from Case Data
