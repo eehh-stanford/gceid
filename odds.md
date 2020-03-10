@@ -90,9 +90,13 @@ exposed relative to the risk of those not exposed:
 If the entries of our table are large enough a normal approximation for
 the binomial distribution applies and we can use normal theory to
 calculate standard errors and place confidence bounds around
-$\\widehat{RR}$. It turns out that $\\log \\widehat{RR}$ has a sampling
-distribution better approximated by a normal, so we work with that. The
-standard error of $\\log \\widehat{RR}$ is
+<img src="https://latex.codecogs.com/svg.latex?\widehat{RR}" title="\widehat{RR}" />.
+It turns out that
+<img src="https://latex.codecogs.com/svg.latex?\log&space;\widehat{RR}" title="\log \widehat{RR}" />
+has a sampling distribution better approximated by a normal, so we work
+with that. The standard error of
+<img src="https://latex.codecogs.com/svg.latex?\log&space;\widehat{RR}" title="\log \widehat{RR}" />
+is
 
 <!--\[ 
 \mathrm{se}[\log \widehat{RR}] \approx \sqrt{\frac{b}{an_1} +
@@ -137,14 +141,16 @@ the mean.
 
 The relative risk is a pretty intuitive idea, but a problem with it is
 that it is constrained by the denominator. If *c*/(*c* + *d*) = 0.5,
-then the biggest the relative risk could be is $\\widehat{RR}=2$. This
-is because the biggest *a*/(*a* + *b*) can be is unity since this would
-happen when *b* = 0, therefore $\\widehat{RR} = 2$. In addition, we
-often (usually?) don’t have a cohort design for our data collection.
-Without the prospective design of a cohort study, relative risks don’t
-make much sense since we shouldn’t believe that *a*/(*a* + *b*) is a
-good estimator of the risk associated with the exposure of interest. We
-can get around this by using an odds ratio.
+then the biggest the relative risk could be is
+<img src="https://latex.codecogs.com/svg.latex?\widehat{RR}=2" title="\widehat{RR}=2" />.
+This is because the biggest *a*/(*a* + *b*) can be is unity since this
+would happen when *b* = 0, therefore
+<img src="https://latex.codecogs.com/svg.latex?\widehat{RR}=2" title="\widehat{RR}=2" />.
+In addition, we often (usually?) don’t have a cohort design for our data
+collection. Without the prospective design of a cohort study, relative
+risks don’t make much sense since we shouldn’t believe that
+*a*/(*a* + *b*) is a good estimator of the risk associated with the
+exposure of interest. We can get around this by using an odds ratio.
 
 The *odds ratio* is the ratio of odds of exposure among cases to those
 among controls:
@@ -199,10 +205,10 @@ pneumonia. It seems that this chef worked in a restaurant that
 specialized in exotic game and had regular contact with several species
 of live caged animals.
 
-Sampling effort thus turned to the exotic animal markets of Guangdong. A
-team from the University of Hong Kong and the Guangdong CDC sampled
-animals from a market in Shenzhen. A total of seven common game animals
-to the market were subjected to both nasal and fecal sampling. Virus was
+Sampling effort thus turned to the animal markets of Guangdong. A team
+from the University of Hong Kong and the Guangdong CDC sampled animals
+from a market in Shenzhen. A total of seven common game animals to the
+market were subjected to both nasal and fecal sampling. Virus was
 repeatedly detected in palm civets. These researchers also took nasal
 samples from the animal traders, in addition to hospital workers,
 Guandong CDC employees, and health visitors to a clinic as a controls. A
