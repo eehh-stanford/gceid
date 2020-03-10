@@ -138,6 +138,7 @@ rownames(cc) <- c("Animal Trader", "Hospital Worker")
 cc
 kable(cc, align="c")
 ```
+
 Calculate the odds ratio and confidence intervals. 
 
 ```{r,cache=TRUE}

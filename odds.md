@@ -241,13 +241,10 @@ al. 2003](https://www.cdc.gov/mmwr/preview/mmwrhtml/mm5241a2.htm)).
 <td style="text-align: center;">4</td>
 <td style="text-align: center;">133</td>
 </tr>
-<tr class="odd">
-<td>Calculate the odds</td>
-<td style="text-align: center;">ratio an</td>
-<td style="text-align: center;">d confidence intervals.</td>
-</tr>
 </tbody>
 </table>
+
+Calculate the odds ratio and confidence intervals.
 
     cc <- matrix(c(66, 442,
                     4, 133), nr=2, nc=2, byrow=TRUE)
