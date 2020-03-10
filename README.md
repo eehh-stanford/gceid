@@ -1,6 +1,6 @@
 ## Global Change and Emerging Infectious Disease
 
-This repository contains the notes and related information for my graduate section for the class, Global Change and Emerging Infectious Disease (Earth Systems 214).
+This repository contains the notes and related information for the graduate section of the class that I teach with [John Openshaw](https://profiles.stanford.edu/john-openshaw), Global Change and Emerging Infectious Disease (Earth Systems 214).
 
 The notes for the class include (links to come)
 
@@ -17,6 +17,6 @@ The notes for the class include (links to come)
 
 ## Scratchpad
 
-In addition to the notes, I will occasionally push notes of timely relevance for the subject infectious disease ecology here.
+In addition to the class notes, I will occasionally push notes of timely relevance for the subject infectious disease ecology here.
 
 - [Uniform sampling of graphs with heterogeneous degree distribution](netsample.md)
