@@ -237,11 +237,14 @@ Now run the models.
       type="l", lwd=2, col="black",
       xlab="Time", ylab="Number of Cases")
     # reduce high-risk
-    lines(stateMatrix2[,"Time"], (stateMatrix2[,"I1"] + stateMatrix2[,"I2"]), type="l", lwd=2, col="blue")
+    lines(stateMatrix2[,"Time"], (stateMatrix2[,"I1"] + stateMatrix2[,"I2"]), 
+          lwd=2, col="blue")
     # reduce low-risk
-    lines(stateMatrix3[,"Time"], (stateMatrix3[,"I1"] + stateMatrix3[,"I2"]), type="l", lwd=2, col="cyan")
+    lines(stateMatrix3[,"Time"], (stateMatrix3[,"I1"] + stateMatrix3[,"I2"]), 
+          lwd=2, col="cyan")
     # reduce both
-    lines(stateMatrix4[,"Time"], (stateMatrix4[,"I1"] + stateMatrix4[,"I2"]), type="l", lwd=2, col="magenta")
+    lines(stateMatrix4[,"Time"], (stateMatrix4[,"I1"] + stateMatrix4[,"I2"]), 
+          lwd=2, col="magenta")
     legend("topright", c("Baseline","Reduce High-Risk", "Reduce Low-Risk", "Reduce Both"), col=c("black","blue","cyan","magenta"), lwd=2)
 
 ![](struct_files/figure-markdown_strict/unnamed-chunk-4-1.png)
@@ -257,11 +260,11 @@ reassuring.
       type="l", lwd=2, col="black",
       xlab="Time", ylab="Number of High-Risk Cases")
     # reduce high-risk
-    lines(stateMatrix2[,"Time"], stateMatrix2[,"I2"], type="l", lwd=2, col="blue")
+    lines(stateMatrix2[,"Time"], stateMatrix2[,"I2"], lwd=2, col="blue")
     # reduce low-risk
-    lines(stateMatrix3[,"Time"], stateMatrix3[,"I2"], type="l", lwd=2, col="cyan")
+    lines(stateMatrix3[,"Time"], stateMatrix3[,"I2"], lwd=2, col="cyan")
     # reduce both
-    lines(stateMatrix4[,"Time"], stateMatrix4[,"I2"], type="l", lwd=2, col="magenta")
+    lines(stateMatrix4[,"Time"], stateMatrix4[,"I2"], lwd=2, col="magenta")
     legend("topright", c("Baseline","Reduce High-Risk", "Reduce Low-Risk", "Reduce Both"), col=c("black","blue","cyan","magenta"), lwd=2)
 
 ![](struct_files/figure-markdown_strict/unnamed-chunk-5-1.png) Note the
