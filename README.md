@@ -5,12 +5,13 @@ This repository contains the notes and related information for the graduate sect
 The notes for the class include (links to come)
 
 - Introduction to `R`
+- Epidemiological Data and Stats in `R`
+- [Notes on Basic Epidemiological Measures of Association](odds.md)
 - [Some Notes on *R*<sub>*0*</sub>](Jones-R0-notes2019.pdf)
 - Sensitivities of *R*<sub>*0*</sub>
-- [Notes on Basic Epidemiological Measures of Association](odds.md)
 - Estimating *R*<sub>*0*</sub> from Case Data
-- Numerical Integration of ODE Models
-- Epidemiological Data and Stats in `R`
+- [Numerical Integration of ODE Models](sir.md)
+- [The Consequences of Structure for Epidemic Models](struct.md)
 - Notes on Time Series and Spectral Analysis
 - Fitting Epidemic Models to Data (Part I)
 
