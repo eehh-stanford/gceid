@@ -3,9 +3,8 @@ title: "Transmission-Dynamics Models"
 author: "James Holland Jones"
 date: "12/2/2017"
 output:
-  html_document:
-    toc: true
-    toc_depth: 2
+  md_document:
+  variant: markdown_github
 ---
 
 ```{r setup, include=FALSE}
@@ -81,7 +80,7 @@ Plot the phase portrait.
 
 ```{r}
 plot(stateMatrix[,"S"], stateMatrix[,"I"], type="l", lwd=2, col="blue",
-     xlab="Suseptible", ylab="Infected")
+     xlab="Susceptible", ylab="Infected")
 ```
 
 
