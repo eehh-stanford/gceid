@@ -101,7 +101,8 @@ Plot the epidemic (i.e., incidence) curves for the two models.
     ## plot epidemic curves
     plot(stateMatrix1[,"Time"], stateMatrix1[,"I"], type="l", lwd=3, col="blue",
          xlab="Time", ylab="Number of Cases")
-    lines(stateMatrix[,"Time"], (stateMatrix[,"I1"] + stateMatrix[,"I2"]), type="l", lwd=3, col="red")
+    lines(stateMatrix[,"Time"], (stateMatrix[,"I1"] + stateMatrix[,"I2"]), 
+          lwd=3, col="red")
     legend("topleft", c("Unstructured","Structured"), col=c("blue","red"), lwd=3)
 
 ![](struct_files/figure-markdown_strict/unnamed-chunk-1-1.png)
