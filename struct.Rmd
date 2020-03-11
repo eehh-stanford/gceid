@@ -17,13 +17,13 @@ Epidemic models, like the SIR model, involve dyads of individuals -- one suscept
 
 We can relax the assumption of a population being well-mixed by adding structure to it. The resulting model will be characterized by *structured mixing*, meaning that there are potentially quite different probabilities associated with dyads that can be formed from the various elements of structure. This structure can represent geographic location (e.g., Palo Alto, CA vs. Columbia, SC) or it can represent various mechanisms by which social or cultural attributes affect the way people interact, e.g., race/ethnicity, age, gender, occupation, social class, income quartile, etc. 
 
-Whatever the nature of the structuring, there are certain generic features of structured epidemic models. First, **structuring slows down epidemics**. Second, **structuring typically leads to smaller epidemics**. As I revise these notes in the midst of COVID19 social-distancing efforts, these points have taken on a new urgency.
+Whatever the nature of the structuring, there are certain generic features of structured epidemic models. First, **structuring slows down epidemics**. Second, **structuring typically leads to smaller epidemics**. As I revise these notes in the midst of COVID-19 social-distancing efforts, these points have taken on a new urgency.
 
 We can construct a toy example to show this qualitative behavior. We will compare two SIR models, one well-mixed and the other structured into two asymmetrically-mixing groups. For the well-mixed model, we will assume that the effective contact rate is $\beta=0.3$ and the removal rate of infectious individuals is $\nu=0.2$. For the structured model, we will assume that the average effective contact rate is the same $\bar{\beta}=0.3$, but that there is asymmetry in the contact rates such that $\beta_{11} =0.5$, $\beta_{12} =0.15$, $\beta_{21} =0.05$, and $\beta_{22} =0.5$, where $\beta_{ij}$ is the rate of transmission from infectious individuals in class $j$ to susceptible individuals in class $i$. Assume that the removal rate is the same for both classes, $\nu = 0.2$.
 
 Plot the epidemic (i.e., incidence) curves for the two models. 
 
-```{r, cache=TRUE, echo=FALSE, message=FALSE}
+```{r, cache=TRUE, message=FALSE}
 library(deSolve)
 
 ## SIR model

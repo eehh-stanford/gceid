@@ -24,7 +24,7 @@ income quartile, etc.
 Whatever the nature of the structuring, there are certain generic
 features of structured epidemic models. First, **structuring slows down
 epidemics**. Second, **structuring typically leads to smaller
-epidemics**. As I revise these notes in the midst of COVID19
+epidemics**. As I revise these notes in the midst of COVID-19
 social-distancing efforts, these points have taken on a new urgency.
 
 We can construct a toy example to show this qualitative behavior. We
@@ -41,6 +41,68 @@ individuals in class *j* to susceptible individuals in class *i*. Assume
 that the removal rate is the same for both classes, *ν* = 0.2.
 
 Plot the epidemic (i.e., incidence) curves for the two models.
+
+    library(deSolve)
+
+    ## SIR model
+    sir <- function(t,x,parms){
+      S <- x[1]
+      I <- x[2]
+      R <- x[3]
+      C <- x[4]
+      with(as.list(parms),
+    {
+      S.dot <- -beta*S*I/N
+      I.dot <- beta*S*I/N - nu*I
+      R.dot <- nu*I
+      C.dot <- beta*S*I/N              ## cumulative cases
+      res <- c(S.dot,I.dot,R.dot,C.dot)
+      list(res)
+    })
+    }
+    ## SIR model with two subpopulations
+    hsir <- function(t,x,parms){
+        S1 <- x[1]
+        I1 <- x[2]
+        R1 <- x[3]
+        S2 <- x[4]
+        I2 <- x[5]
+        R2 <- x[6]
+        C <- x[7]
+        with(as.list(parms),
+             {
+                 S1.dot <- -S1*(beta11*I1 + beta12*I2)/N
+                 I1.dot <- S1*(beta11*I1 + beta12*I2)/N - nu*I1
+                 R1.dot <- nu*I1
+                 S2.dot <- -S2*(beta22*I2 + beta21*I1)/N
+                 I2.dot <- S2*(beta22*I2 + beta21*I1)/N - nu*I2
+                 R2.dot <- nu*I2
+                 C.dot <-  S1*(beta11*I1 + beta12*I2)/N + S2*(beta22*I2 + beta21*I1)/N       ## cumulative cases
+                 res <- c(S1.dot,I1.dot,R1.dot,S2.dot,I2.dot,R2.dot,C.dot)
+                 list(res)
+             })
+    }
+
+    times <- seq(0,300,1)
+    N <- 1000000
+    x0 <- c((N-1)/2,0.5,0,(N-1)/2,0.5,0,1)
+    parms <- c(N=N, beta11=0.5, beta12=0.15, beta22=0.5, beta21=0.05, nu=1/5)
+
+    ## ODE evals
+    stateMatrix <- ode(y=x0, times, hsir, parms)
+    colnames(stateMatrix) <- c("Time","S1","I1","R1","S2","I2","R2","C")
+
+    ### Compare to unstructured model
+    y0 <- c(N-1,1,0,1)
+    parms0 <- c(N=N, beta=0.3, nu=1/5)
+    stateMatrix1 <- ode(y=y0, times, sir, parms0)
+    colnames(stateMatrix1) <- c("Time","S","I","R","C")
+
+    ## plot epidemic curves
+    plot(stateMatrix1[,"Time"], stateMatrix1[,"I"], type="l", lwd=3, col="blue",
+         xlab="Time", ylab="Number of Cases")
+    lines(stateMatrix[,"Time"], (stateMatrix[,"I1"] + stateMatrix[,"I2"]), type="l", lwd=3, col="red")
+    legend("topleft", c("Unstructured","Structured"), col=c("blue","red"), lwd=3)
 
 ![](struct_files/figure-markdown_strict/unnamed-chunk-1-1.png)
 
