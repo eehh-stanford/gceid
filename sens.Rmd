@@ -1,12 +1,11 @@
 ---
-title: "Sensitivities for Multi-Host Epidemics"
+title: "Sensitivities for Structured and Multi-Host Epidemics"
 author: "James Holland Jones"
-date: "04/12/2019"
+date: "03/14/2020"
 output:
-  html_document:
-    toc: true
-    toc_depth: 2
-bibliography: ro.bib
+  md_document:
+  variant: markdown_github
+bibliography: r0.bib
 csl: chicago-author-date-16th-edition.csl
 ---
 
@@ -14,7 +13,12 @@ csl: chicago-author-date-16th-edition.csl
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Working with $2 \times 2$ Matrices
+# The Next-Generation Matrix
+
+The basic reproduction number, $R_0$, is the expected number of secondary cases caused by a single typical case at the outset of an epidemic. When there are multiple types of hosts, we need to think hard about what "typical" means. Fortunately, as we discuss in the [notes on $R_0$](https://eehh-stanford.github.io/gceid/Jones-R0-notes2020.pdf), there is a simple way to extend the calculation of $R_0$ to structured populations first introduced by @diekmann_etal1990. The *next-generation matrix* is a square matrix $\mathbf{G}$ in which the $ij$th element of $\mathbf{G}$, $g_{ij}$, is the
+expected number of secondary infections of type $i$ caused by a single infected individual of type $j$, again assuming that the population of type $i$ is entirely susceptible.  $\mathbf{G}$ is a positive matrix and this means that, from the Perron-Frobenius Theorem, that there will be one eigenvalue that is real, positive, and strictly greater than all others. We call this eigenvalue "the dominant eigenvalue" of matrix $\mathbf{G}$.  $R_0$ is simply the dominant eigenvalue of $\mathbf{G}$.
+
+## Working with $2 \times 2$ Matrices
 
 When you're going to construct a lot of next-generation matrices, it can be handy to write a quick function to facilitate this. The `R` function `matrix()` requires an input vector (subject to standard recycling rules), the number of rows, and number of columns. Most people will also want to add the argument `byrow=TRUE` to override the default columnwise filling of matrices (a holdover from FORTRAN).
 
@@ -27,9 +31,10 @@ eigen(g)
 
 # The Fastest Way to Reduce $R_0$ in a Multi-Host Epidemic
 
-We want to bring $R_0$ below one in a multi-host epidemic. Clearly, reducing the number of infections in any cell in the next-generation matrix will reduce $R_0$, but which will do it the most for the smallest effort? To do this, we calculate the *sensitivities* of $R_0$ to a change in the various entries of the next-generation matrix. These are the partial derivatives (i.e., the rate of change in $R_0$ with respect to $g_{ij}$ holding everything else constant).
+We want to bring the effective reproduction number $R_0$ below one in a multi-host epidemic. Clearly, reducing the number of infections in any cell in the next-generation matrix will reduce $R_0$, but which will provide the greatest reduction for a given effort? To figure this out, we calculate the *sensitivities* of $R_0$ to a change in the various entries of the next-generation matrix. These are the partial derivatives (i.e., the rate of change in $R_0$ with respect to $g_{ij}$ holding everything else constant).
 
-\[ s_{ij} = \frac{\partial R_0}{\partial g_{ij}} \]
+<img src="https://latex.codecogs.com/svg.latex?s_{ij}&space;=&space;\frac{\partial&space;R_0}{\partial&space;g_{ij}}" title="s_{ij} = \frac{\partial R_0}{\partial g_{ij}}" />
+<!-- \[ s_{ij} = \frac{\partial R_0}{\partial g_{ij}} \] -->
 
 ```{r, cache=TRUE}
 calc.sens <- function(G){
@@ -49,14 +54,17 @@ calc.sens <- function(G){
 
 Consider a three-species model introduced by @cohen_gurtler2001. The three species included in this household-based model are humans, triatomine bugs, and dogs. Define $\mathbf{G}$:
 
-\[ \mathbf{G} = \left[ \begin{array}{ccc}
+<img src="https://latex.codecogs.com/svg.latex?\mathbf{G}&space;=&space;\left[&space;\begin{array}{ccc}&space;0&space;&&space;g_{B&space;\leftarrow&space;D}&space;&&space;g_{B&space;\leftarrow&space;H}&space;\\&space;g_{D&space;\leftarrow&space;B}&space;&&space;0&space;&&space;0&space;\\&space;g_{H&space;\leftarrow&space;B}&space;&&space;0&space;&&space;0&space;\end{array}&space;\right]," title="\mathbf{G} = \left[ \begin{array}{ccc} 0 & g_{B \leftarrow D} & g_{B \leftarrow H} \\ g_{D \leftarrow B} & 0 & 0 \\ g_{H \leftarrow B} & 0 & 0 \end{array} \right]," />
+
+<!-- \[ \mathbf{G} = \left[ \begin{array}{ccc}
             0 & g_{B \leftarrow D} & g_{B \leftarrow H} \\
             g_{D \leftarrow B} & 0 & 0 \\
             g_{H \leftarrow B}  & 0 & 0
             \end{array} \right],
 \]
+-->
 
-where (e.g.) $g_{B \leftarrow D}$ is the dog-infecting-bug  reproduction number.
+where (e.g.) <img src="https://latex.codecogs.com/svg.latex?g_{B&space;\leftarrow&space;D}" title="g_{B \leftarrow D}" /> is the dog-infecting-bug reproduction number.
 
 @cohen_gurtler2001 give some data that allow us to estimate the next generation matrix. We fill in the missing parameters with educated guesses (more on this later) and calculate the sensitivities.
 
@@ -71,10 +79,12 @@ We can see that $R_0 = 5.08$ and that, by far, the element of $\mathbf{G}$ with 
 
 # Elasticities
 
-Sensitivities tell us about the absolute change in $R_0$ given a small change in one of the entries in $\mathbf{G}$. Sometimes we want to know about the proportional sensitivities though. Use a trick invented by Carl Jacobi in the mid nineteenth century.  Define a proportional sensitivity (or *elasticity*) as
+Sensitivities tell us about the absolute change in $R_0$ given a small change in one of the entries in $\mathbf{G}$. Sometimes we want to know about the proportional sensitivities though. Use a trick invented by Carl Jacobi in the mid-nineteenth century. Define a proportional sensitivity (or *elasticity*) as
 
-\[ e_{ij} = \frac{g_{ij}}{R_0} \cdot \frac{\partial R_0}{\partial
-  g_{ij}} = \frac{\partial \log(R_0)}{\partial \log(g_{ij})}.\]
+<!-- \[ e_{ij} = \frac{g_{ij}}{R_0} \cdot \frac{\partial R_0}{\partial
+  g_{ij}} = \frac{\partial \log(R_0)}{\partial \log(g_{ij})}.\] -->
+  
+<img src="https://latex.codecogs.com/svg.latex?e_{ij}&space;=&space;\frac{g_{ij}}{R_0}&space;\cdot&space;\frac{\partial&space;R_0}{\partial&space;g_{ij}}&space;=&space;\frac{\partial&space;\log(R_0)}{\partial&space;\log(g_{ij})}" title="e_{ij} = \frac{g_{ij}}{R_0} \cdot \frac{\partial R_0}{\partial g_{ij}} = \frac{\partial \log(R_0)}{\partial \log(g_{ij})}" />
 
 Elasticities answer the following question: if $g_{ij}$ increases by 1%, by what percentage will $R_0$ increase? Elasticities also have the convenient property of summing to one across all elements of the next generation matrix. They thus represent the fraction of the total potential reduction embodied in each cell of the next generation matrix (assuming everything else stays the same).
 
@@ -98,19 +108,80 @@ calc.elas <- function(G){
   
 So our elasticity matrix looks like this:
 
-\[ \mathbf{E} = \left[ \begin{array}{ccc}
+<!-- \[ \mathbf{E} = \left[ \begin{array}{ccc}
 0.00 & 0.47 & 0.03 \\
 0.47 & 0.00 & 0.00 \\
 0.03 & 0.00 & 0.00 
  \end{array} \right].
-\]
+\] -->
 
-Transmission from bugs to dogs and dogs to bugs accounts for
-more than 94% of the elasticity. Clearly, we need to stop the canine transmission cycle!
+<img src="https://latex.codecogs.com/svg.latex?\mathbf{E}&space;=&space;\left[&space;\begin{array}{ccc}&space;0.00&space;&&space;0.47&space;&&space;0.03&space;\\&space;0.47&space;&&space;0.00&space;&&space;0.00&space;\\&space;0.03&space;&&space;0.00&space;&&space;0.00&space;\end{array}&space;\right]" title="\mathbf{E} = \left[ \begin{array}{ccc} 0.00 & 0.47 & 0.03 \\ 0.47 & 0.00 & 0.00 \\ 0.03 & 0.00 & 0.00 \end{array} \right]" />
+
+Transmission from bugs to dogs and dogs to bugs accounts for more than 94% of the elasticity. Clearly, we need to stop the canine transmission cycle! The elasticities of all pairs (e.g., bugs to dogs/dogs to bugs) are identical because of a feature of elasticities identified by @vongroenendael_etal1994. In brief, the sum of elasticities of the incoming transitions to a vertex in the transmission graph will equal the sum of the elasticities of the outgoing transitions. Because humans and dogs don't infect each other, this means that the elasticities involving bugs and the two mammal species (i.e., humans, dogs) will be equal to each other. More later.
+
+# Other Structured Epidemic Models
+
+All of the examples so far have involved multi-host infections. There are many important ways that disease transmission is structured *within* human populations as well. For example, the transmission of respiratory infections like influenza is quite strongly age-structured [@hill_longini2003]. Indeed, social categories can have a profound impact on the transmission dynamics of epidemics.  @kucharski_etal2014 show that during the 2009 H1N1 Influenza pandemic, infection risk among people in Hong Kong was more influenced by the average reported social mixing behavior of an individual's age group, than it was by their own reported contacts. For easily-transmitted respiratory pathogens like influenza A, the aggregate patterns can overwhelm the particular behavior of individuals. 
+
+We can use sensitivity/elasticity analysis of the next-generation matrix to help us determine the categories of people on whom we should concentrate our epidemic-control efforts if we want to have maximum effect for a given effort. 
+
+@hill_longini2003 present a next-generation matrix for influenza-A transmission calculated from data presented in @longini_etal1978: 
+
+<!-- \[ \mathbf{G} = \left[ \begin{array}{ccccc}
+    0.60 & 0.10 & 0.10 & 0.10 & 0.10 \\
+    0.20 & 1.70 & 0.30 & 0.20 & 0.20 \\
+    0.40 & 0.30 & 0.50 & 0.40 & 0.30 \\
+    0.20 & 0.10 & 0.30 & 0.20 & 0.10 \\
+    0.10 & 0.10 & 0.10 & 0.10 & 0.10 
+		       \end{array} \right] 
+\]
+-->
+<img src="https://latex.codecogs.com/svg.latex?\mathbf{G}&space;=&space;\left[&space;\begin{array}{ccccc}&space;0.60&space;&&space;0.10&space;&&space;0.10&space;&&space;0.10&space;&&space;0.10&space;\\&space;0.20&space;&&space;1.70&space;&&space;0.30&space;&&space;0.20&space;&&space;0.20&space;\\&space;0.40&space;&&space;0.30&space;&&space;0.50&space;&&space;0.40&space;&&space;0.30&space;\\&space;0.20&space;&&space;0.10&space;&&space;0.30&space;&&space;0.20&space;&&space;0.10&space;\\&space;0.10&space;&&space;0.10&space;&&space;0.10&space;&&space;0.10&space;&&space;0.10&space;\end{array}&space;\right]" title="\mathbf{G} = \left[ \begin{array}{ccccc} 0.60 & 0.10 & 0.10 & 0.10 & 0.10 \\ 0.20 & 1.70 & 0.30 & 0.20 & 0.20 \\ 0.40 & 0.30 & 0.50 & 0.40 & 0.30 \\ 0.20 & 0.10 & 0.30 & 0.20 & 0.10 \\ 0.10 & 0.10 & 0.10 & 0.10 & 0.10 \end{array} \right]" />
+
+where the classes are: (1) pre-school age, (2) school age, (3) young adult, (4) mid-adult, (5) old adult.
+
+```{r cache=TRUE}
+G <- matrix( 
+  c(0.60,0.10,0.10,0.10,0.10,
+    0.20,1.70,0.30,0.20,0.20,
+    0.40,0.30,0.50,0.40,0.30,
+    0.20,0.10,0.30,0.20,0.10,
+    0.10,0.10,0.10,0.10,0.10), nr=5, nc=5,
+  byrow=TRUE)
+
+(E <- calc.elas(G))
+round(E,2)
+```
+
+We can see that, overwhelmingly, the most important task should be controlling transmission between school-age children. This should not be that surprising, given the fact that the entry for the **G**-matrix for within-school-age transmission is more that three times higher than for any other pairwise value. Note that the elasticity for this transmission is over 19 times higher than any other dyad in the population.
+
+@longini_etal1978 note that different infections will have different optimal patterns of control and that these depend critically on the age-structure of transmission for the different pathogens. 
+
+## Simple Model for Disease with High- and Low-Risk Subpopulations
+
+As we saw in the [notes on structured epidemic models](https://eehh-stanford.github.io/gceid/struct.html), reducing contacts with the low-risk/high-activity subpopulation is the most effective way to flatten the epidemic curve. 
+
+```{r cache=TRUE}
+# beta matrix: (0.5,, 0.15, 0.05, 0.5)
+# population structure is 2/3 low-risk, 1/3 high-risk
+# everyone recovers at rate 1/5
+(G <- make2x2(0.5*.67, 0.15*0.33, 0.05*0.67, 0.5*0.33)*5)
+(E <- calc.elas(G))
+```
+
+We see that, overwhelmingly, the best epidemic-reduction bang for our public-health buck comes from reducing the contacts within the low-risk population. This means social distancing.
+
+A generalization that emerges from applying this sort of analysis to a range of systems is that the most efficient method for epidemic control is to reduce the number of infections in the the subpopulation that has the most infections. This makes sense: you want to reduce the largest source of potential infections in the population. Examples include:
+
+- Reducing transmission among the high-risk segment (e.g., sex workers, injection-drug users), often known as "the core," for sexually-transmitted infections like gonorrhea [@hethcote_yorke1984].
+- Reducing transmission among school-age children for influenza
+- Reducing transmission among domestic fowl in bird-flu
+- Reducing transmission from triatomine bugs to peri-domestic dogs in Chagas disease - Reducing transmission within the low-risk/high-activity subpopulation in a [simple model of COVID-19 dynamics](https://eehh-stanford.github.io/gceid/struct.html)
 
 # Going Further
 
 @caswell2019 provides a comprehensive account of the use of sensitivity analysis in matrix population models. The book is open-access.
+
 
 # References
 
