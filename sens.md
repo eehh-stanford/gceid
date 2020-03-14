@@ -9,14 +9,14 @@ about what “typical” means. Fortunately, as we discuss in the [notes on
 there is a simple way to extend the calculation of *R*<sub>0</sub> to
 structured populations first introduced by Diekmann, Heesterbeek, and
 Metz (1990). The *next-generation matrix* is a square matrix **G** in
-which the *ij*th element of **G**, *g*<sub>*ij*</sub>, is the
-expected number of secondary infections of type *i* caused by a single
-infected individual of type *j*, again assuming that the population of
-type *i* is entirely susceptible. **G** is a positive matrix and this
-means that, from the Perron-Frobenius Theorem, that there will be one
-eigenvalue that is real, positive, and strictly greater than all others.
-We call this eigenvalue “the dominant eigenvalue” of matrix **G**.
-*R*<sub>0</sub> is simply the dominant eigenvalue of **G**.
+which the *ij*th element of **G**, *g*<sub>ij</sub>, is the expected
+number of secondary infections of type *i* caused by a single infected
+individual of type *j*, again assuming that the population of type *i*
+is entirely susceptible. **G** is a positive matrix and this means that,
+from the Perron-Frobenius Theorem, there will be one eigenvalue that is
+real, positive, and strictly greater than all others. We call this
+eigenvalue “the dominant eigenvalue” of matrix **G**. *R*<sub>0</sub> is
+simply the dominant eigenvalue of **G**.
 
 Working with 2 × 2 Matrices
 ---------------------------
@@ -130,7 +130,7 @@ sensitivity (or *elasticity*) as
   g_{ij}} = \frac{\partial \log(R_0)}{\partial \log(g_{ij})}.\] -->
 <img src="https://latex.codecogs.com/svg.latex?e_{ij}&space;=&space;\frac{g_{ij}}{R_0}&space;\cdot&space;\frac{\partial&space;R_0}{\partial&space;g_{ij}}&space;=&space;\frac{\partial&space;\log(R_0)}{\partial&space;\log(g_{ij})}" title="e_{ij} = \frac{g_{ij}}{R_0} \cdot \frac{\partial R_0}{\partial g_{ij}} = \frac{\partial \log(R_0)}{\partial \log(g_{ij})}" />
 
-Elasticities answer the following question: if *g*<sub>*ij*</sub>
+Elasticities answer the following question: if *g*<sub>*i**j*</sub>
 increases by 1%, by what percentage will *R*<sub>0</sub> increase?
 Elasticities also have the convenient property of summing to one across
 all elements of the next generation matrix. They thus represent the
@@ -315,36 +315,36 @@ and Ecology*. Demographic Research Monographs (a Series of the Max
 Planck Institute for Demographic Research). Cham, Switzerland: Springer.
 doi:[10.1007/978-3-030-10534-1\_1](https://doi.org/10.1007/978-3-030-10534-1_1).
 
-Cohen, J.E., and R.E. Gürtler. 2001. Modeling Household Transmission of
-American Trypanosomiasis. *Science* 293: 694–98.
+Cohen, J.E., and R.E. Gürtler. 2001. “Modeling Household Transmission of
+American Trypanosomiasis.” *Science* 293: 694–98.
 doi:[10.1126/science.1060638](https://doi.org/10.1126/science.1060638).
 
-Diekmann, O., J. A. P. Heesterbeek, and J. A. J. Metz. 1990. On the
+Diekmann, O., J. A. P. Heesterbeek, and J. A. J. Metz. 1990. “On the
 Definition and the Computation of the Basic Reproduction Ratio
 *R*<sub>0</sub> in Models for Infectious Diseases in Heterogeneous
-Populations. *Journal of Mathematical Biology* 28 (4): 365–82.
+Populations.” *Journal of Mathematical Biology* 28 (4): 365–82.
 doi:[10.1007/BF00178324](https://doi.org/10.1007/BF00178324).
 
 Groenendael, Jan van, Hans de Kroon, Susan Kalisz, and Shripad
-Tuljapurkar. 1994. Loop Analysis: Evaluating Life History Pathways in
-Population Projection Matrices. *Ecology* 75 (8): 2410–5.
+Tuljapurkar. 1994. “Loop Analysis: Evaluating Life History Pathways in
+Population Projection Matrices.” *Ecology* 75 (8): 2410–5.
 doi:[10.2307/1940894](https://doi.org/10.2307/1940894).
 
 Hethcote, H. W., and J. A. Yorke. 1984. *Gonorrhea: Transmission
 Dynamics and Control*. Vol. 56. Lecture Notes in Biomathematics.
 
-Hill, A. N., and I. M. Longini. 2003. The Critical Vaccination Fraction
-for Heterogeneous Epidemic Models. *Mathematical Biosciences* 181 (1):
+Hill, A. N., and I. M. Longini. 2003. “The Critical Vaccination Fraction
+for Heterogeneous Epidemic Models.” *Mathematical Biosciences* 181 (1):
 85–106.
 doi:[10.1016/S0025-5564(02)00129-3](https://doi.org/10.1016/S0025-5564(02)00129-3).
 
 Kucharski, Adam J., Kin O. Kwok, Vivian W. I. Wei, Benjamin J. Cowling,
 Jonathan M. Read, Justin Lessler, Derek A. Cummings, and Steven Riley.
-2014. The Contribution of Social Behaviour to the Transmission of
-Influenza A in a Human Population. *PLOS Pathogens* 10 (6): e1004206.
+2014. “The Contribution of Social Behaviour to the Transmission of
+Influenza A in a Human Population.” *PLOS Pathogens* 10 (6): e1004206.
 doi:[10.1371/journal.ppat.1004206](https://doi.org/10.1371/journal.ppat.1004206).
 
-Longini, Ira M., Eugene Ackerman, and Lila R. Elveback. 1978. An
-Optimization Model for Influenza a Epidemics. *Mathematical
+Longini, Ira M., Eugene Ackerman, and Lila R. Elveback. 1978. “An
+Optimization Model for Influenza a Epidemics.” *Mathematical
 Biosciences* 38 (1): 141–57.
 doi:[10.1016/0025-5564(78)90023-8](https://doi.org/10.1016/0025-5564(78)90023-8).
