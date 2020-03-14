@@ -9,7 +9,7 @@ about what “typical” means. Fortunately, as we discuss in the [notes on
 there is a simple way to extend the calculation of *R*<sub>0</sub> to
 structured populations first introduced by Diekmann, Heesterbeek, and
 Metz (1990). The *next-generation matrix* is a square matrix **G** in
-which the *i**j*th element of **G**, *g*<sub>*i**j*</sub>, is the
+which the *ij*th element of **G**, *g*<sub>*ij*</sub>, is the
 expected number of secondary infections of type *i* caused by a single
 infected individual of type *j*, again assuming that the population of
 type *i* is entirely susceptible. **G** is a positive matrix and this
