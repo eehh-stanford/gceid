@@ -31,7 +31,7 @@ eigen(g)
 
 # The Fastest Way to Reduce $R_0$ in a Multi-Host Epidemic
 
-We want to bring the effective reproduction number $R_0$ below one in a multi-host epidemic. Clearly, reducing the number of infections in any cell in the next-generation matrix will reduce $R_0$, but which will provide the greatest reduction for a given effort? To figure this out, we calculate the *sensitivities* of $R_0$ to a change in the various entries of the next-generation matrix. These are the partial derivatives (i.e., the rate of change in $R_0$ with respect to $g_{ij}$ holding everything else constant).
+We want to bring the effective reproduction number $R_0$ below one in a multi-host epidemic. Clearly, reducing the number of infections in any cell in the next-generation matrix will reduce $R_0$, but which will provide the greatest reduction for a given effort? To figure this out, we calculate the *sensitivities* of $R_0$ to a change in the various entries of the next-generation matrix. These are the partial derivatives (i.e., the rate of change in $R_0$ with respect to *g*<sub>ij</sub> holding everything else constant).
 
 <img src="https://latex.codecogs.com/svg.latex?s_{ij}&space;=&space;\frac{\partial&space;R_0}{\partial&space;g_{ij}}" title="s_{ij} = \frac{\partial R_0}{\partial g_{ij}}" />
 <!-- \[ s_{ij} = \frac{\partial R_0}{\partial g_{ij}} \] -->
@@ -86,7 +86,7 @@ Sensitivities tell us about the absolute change in $R_0$ given a small change in
   
 <img src="https://latex.codecogs.com/svg.latex?e_{ij}&space;=&space;\frac{g_{ij}}{R_0}&space;\cdot&space;\frac{\partial&space;R_0}{\partial&space;g_{ij}}&space;=&space;\frac{\partial&space;\log(R_0)}{\partial&space;\log(g_{ij})}" title="e_{ij} = \frac{g_{ij}}{R_0} \cdot \frac{\partial R_0}{\partial g_{ij}} = \frac{\partial \log(R_0)}{\partial \log(g_{ij})}" />
 
-Elasticities answer the following question: if $g_{ij}$ increases by 1%, by what percentage will $R_0$ increase? Elasticities also have the convenient property of summing to one across all elements of the next generation matrix. They thus represent the fraction of the total potential reduction embodied in each cell of the next generation matrix (assuming everything else stays the same).
+Elasticities answer the following question: if *g*<sub>ij</sub> increases by 1%, by what percentage will $R_0$ increase? Elasticities also have the convenient property of summing to one across all elements of the next generation matrix. They thus represent the fraction of the total potential reduction embodied in each cell of the next generation matrix (assuming everything else stays the same).
 
 ```{r, cache=TRUE}
 calc.elas <- function(G){

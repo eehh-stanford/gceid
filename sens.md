@@ -56,7 +56,7 @@ but which will provide the greatest reduction for a given effort? To
 figure this out, we calculate the *sensitivities* of *R*<sub>0</sub> to
 a change in the various entries of the next-generation matrix. These are
 the partial derivatives (i.e., the rate of change in *R*<sub>0</sub>
-with respect to *g*<sub>*i**j*</sub> holding everything else constant).
+with respect to *g*<sub>ij</sub> holding everything else constant).
 
 <img src="https://latex.codecogs.com/svg.latex?s_{ij}&space;=&space;\frac{\partial&space;R_0}{\partial&space;g_{ij}}" title="s_{ij} = \frac{\partial R_0}{\partial g_{ij}}" />
 <!-- \[ s_{ij} = \frac{\partial R_0}{\partial g_{ij}} \] -->
@@ -130,7 +130,7 @@ sensitivity (or *elasticity*) as
   g_{ij}} = \frac{\partial \log(R_0)}{\partial \log(g_{ij})}.\] -->
 <img src="https://latex.codecogs.com/svg.latex?e_{ij}&space;=&space;\frac{g_{ij}}{R_0}&space;\cdot&space;\frac{\partial&space;R_0}{\partial&space;g_{ij}}&space;=&space;\frac{\partial&space;\log(R_0)}{\partial&space;\log(g_{ij})}" title="e_{ij} = \frac{g_{ij}}{R_0} \cdot \frac{\partial R_0}{\partial g_{ij}} = \frac{\partial \log(R_0)}{\partial \log(g_{ij})}" />
 
-Elasticities answer the following question: if *g*<sub>*i**j*</sub>
+Elasticities answer the following question: if *g*<sub>ij</sub>
 increases by 1%, by what percentage will *R*<sub>0</sub> increase?
 Elasticities also have the convenient property of summing to one across
 all elements of the next generation matrix. They thus represent the
