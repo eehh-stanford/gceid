@@ -69,6 +69,7 @@ where $y$ is the number of successes out of $n$ trials and $\alpha$ and $\beta$ 
 
 ```{r, cache=TRUE}
 n <- 5*length(crowded)
+y <- sum(crowded)
 alpha <- 1
 beta <- 1
 phat <- (y+1)/(alpha+beta+n)
