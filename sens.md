@@ -5,7 +5,7 @@ The basic reproduction number, *R*<sub>0</sub>, is the expected number
 of secondary cases caused by a single typical case at the outset of an
 epidemic. When there are multiple types of hosts, we need to think hard
 about what “typical” means. Fortunately, as we discuss in the [notes on
-*R*<sub>0</sub>](https://eehh-stanford.github.io/gceid/Jones-R0-notes2020.pdf),
+*R*<sub>0</sub>](https://github.com/eehh-stanford/gceid/blob/master/Jones-R0-notes2021.pdf),
 there is a simple way to extend the calculation of *R*<sub>0</sub> to
 structured populations first introduced by Diekmann, Heesterbeek, and
 Metz (1990). The *next-generation matrix* is a square matrix **G** in
